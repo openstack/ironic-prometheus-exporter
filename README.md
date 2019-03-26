@@ -1,9 +1,8 @@
-Ironic Prometheus Exporter
-==========================
+# Ironic Prometheus Exporter
 
 
-Configuration
-=============
+
+### Configuration
 
 After install the driver you will need to update the :ironic.conf: and add
 :file_dir: and :file_name: options
