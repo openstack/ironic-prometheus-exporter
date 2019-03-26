@@ -4,8 +4,7 @@ from oslo_config import cfg
 from oslo_messaging.notify import notifier
 
 prometheus_opts = [
-    cfg.StrOpt('file_name', required=True),
-    cfg.StrOpt('file_dir', required=True)
+    cfg.StrOpt('file_path', required=True),
 ]
 
 
@@ -14,17 +13,15 @@ def register_opts(conf):
 
 
 class PrometheusFileDriver(notifier.Driver):
-
-    "Publish notifications into a File to be used by Prometheus"
+    """Publish notifications into a File to be used by Prometheus"""
 
     def __init__(self, conf, topics, transport):
-        self.file_dir = conf.oslo_messaging_notifications.file_dir
-        self.file_name = conf.oslo_messaging_notifications.file_name
-        if not os.path.exists(self.file_dir):
-            os.makedirs(self.file_dir)
+        self.file_path = conf.oslo_messaging_notifications.file_path
+        if not os.path.exists(os.path.dirname(self.file_path)):
+            os.makedirs(os.path.dirname(self.file_path))
         super(PrometheusFileDriver, self).__init__(conf, topics, transport)
 
     def notify(self, ctxt, message, priority, retry):
-        prometheus_file = open((self.file_dir + '/' + self.file_name), 'w')
+        prometheus_file = open(self.file_path, 'w')
         prometheus_file.write(str(message))
         prometheus_file.close()
