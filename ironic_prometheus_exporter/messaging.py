@@ -9,18 +9,19 @@ prometheus_opts = [
 ]
 
 
+def register_opts(conf):
+    conf.register_opts(prometheus_opts, group='oslo_messaging_notifications')
+
+
 class PrometheusFileDriver(notifier.Driver):
 
     "Publish notifications into a File to be used by Prometheus"
 
     def __init__(self, conf, topics, transport):
-        conf.register_opts(prometheus_opts,
-                           group='oslo_messaging_notifications')
-        self.conf = conf
-        if not os.path.exists(self.conf.oslo_messaging_notifications.file_dir):
-            os.makedirs(self.conf.oslo_messaging_notifications.file_dir)
-        self.file_dir = self.conf.oslo_messaging_notifications.file_dir
-        self.file_name = self.conf.oslo_messaging_notifications.file_name
+        self.file_dir = conf.oslo_messaging_notifications.file_dir
+        self.file_name = conf.oslo_messaging_notifications.file_name
+        if not os.path.exists(self.file_dir):
+            os.makedirs(self.file_dir)
         super(PrometheusFileDriver, self).__init__(conf, topics, transport)
 
     def notify(self, ctxt, message, priority, retry):
