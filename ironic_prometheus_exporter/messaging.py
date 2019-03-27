@@ -1,10 +1,12 @@
 import os
+import json
 
 from oslo_config import cfg
 from oslo_messaging.notify import notifier
 
 prometheus_opts = [
-    cfg.StrOpt('file_path', required=True),
+    cfg.StrOpt('file_path', required=True,
+               help='Path for the json file where the metrics will be stored.')
 ]
 
 
@@ -17,11 +19,12 @@ class PrometheusFileDriver(notifier.Driver):
 
     def __init__(self, conf, topics, transport):
         self.file_path = conf.oslo_messaging_notifications.file_path
+        if not self.file_path.endswith('.json'):
+            raise Exception('The file should end with .json')
         if not os.path.exists(os.path.dirname(self.file_path)):
             os.makedirs(os.path.dirname(self.file_path))
         super(PrometheusFileDriver, self).__init__(conf, topics, transport)
 
     def notify(self, ctxt, message, priority, retry):
-        prometheus_file = open(self.file_path, 'w')
-        prometheus_file.write(str(message))
-        prometheus_file.close()
+        with open(self.file_path, 'w') as prometheus_file:
+            json.dump(message, prometheus_file)
