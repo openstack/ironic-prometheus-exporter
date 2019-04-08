@@ -1,12 +1,13 @@
 import os
-import json
 
+from ironic_prometheus_exporter.parsers import manager
 from oslo_config import cfg
 from oslo_messaging.notify import notifier
 
+
 prometheus_opts = [
-    cfg.StrOpt('file_path', required=True,
-               help='Path for the json file where the metrics will be stored.')
+    cfg.StrOpt('files_dir', required=True,
+               help='Directory where the files will be written.')
 ]
 
 
@@ -18,13 +19,32 @@ class PrometheusFileDriver(notifier.Driver):
     """Publish notifications into a File to be used by Prometheus"""
 
     def __init__(self, conf, topics, transport):
-        self.file_path = conf.oslo_messaging_notifications.file_path
-        if not self.file_path.endswith('.json'):
-            raise Exception('The file should end with .json')
-        if not os.path.exists(os.path.dirname(self.file_path)):
-            os.makedirs(os.path.dirname(self.file_path))
+        self.files_dir = conf.oslo_messaging_notifications.files_dir
+        if not os.path.exists(self.files_dir):
+            os.makedirs(os.path.dirname(self.files_dir))
         super(PrometheusFileDriver, self).__init__(conf, topics, transport)
 
     def notify(self, ctxt, message, priority, retry):
-        with open(self.file_path, 'w') as prometheus_file:
-            json.dump(message, prometheus_file)
+        try:
+            node_parser_manager = manager.ParserManager(message)
+            node_metrics = node_parser_manager.merge_information()
+            node_name = message['payload']['node_name']
+            node_file = open(os.path.join(self.files_dir, node_name), 'w')
+            node_file.write(node_metrics)
+            node_file.close()
+        except Exception as e:
+            print(e)
+
+
+class SimpleFileDriver(notifier.Driver):
+
+    def __init__(self, conf, topics, transport):
+        self.files_dir = conf.oslo_messaging_notifications.files_dir
+        if not os.path.exists(self.files_dir):
+            os.makedirs(os.path.dirname(self.files_dir))
+        super(SimpleFileDriver, self).__init__(conf, topics, transport)
+
+    def notify(self, ctx, message, priority, retry):
+        file = open(os.path.join(self.files_dir, 'simplefile'), 'w')
+        file.write(message)
+        file.close()
