@@ -120,5 +120,4 @@ class TestIpmiManager(unittest.TestCase):
     def test_manager(self):
         node_manager = manager.ParserManager(DATA)
         node_metrics = node_manager.merge_information()
-        print(node_metrics.split('\n'))
         self.assertEqual(len(node_metrics.split('\n')), 67)

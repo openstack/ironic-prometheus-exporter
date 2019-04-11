@@ -21,7 +21,7 @@ class PrometheusFileDriver(notifier.Driver):
     def __init__(self, conf, topics, transport):
         self.files_dir = conf.oslo_messaging_notifications.files_dir
         if not os.path.exists(self.files_dir):
-            os.makedirs(os.path.dirname(self.files_dir))
+            os.makedirs(self.files_dir)
         super(PrometheusFileDriver, self).__init__(conf, topics, transport)
 
     def notify(self, ctxt, message, priority, retry):

@@ -12,62 +12,87 @@ def add_prometheus_type(name, metric_type):
     return '# TYPE %s %s' % (name, metric_type)
 
 
+def metric_names(payload, prefix, sufix, extract_unit=False,
+                 special_label=None):
+    metric_dic = {}
+    for entry in payload:
+        if special_label == 'fan':
+            e = re.sub(r'[\d].*$', '', entry.lower())
+            e = re.sub(r'[\(\)]', '', e).split()
+            label = '_'.join(e)
+        else:
+            e = re.sub(r"[\d]+", "", entry).lower().split()
+            label = '_'.join(e[:-1]).replace('-', '_')
+
+        if extract_unit:
+            sensor_read = payload[entry]['Sensor Reading'].split()
+            if len(sensor_read) > 1:
+                sufix = '_' + sensor_read[-1].lower()
+
+        if special_label == 'memory':
+            if 'mem' not in label and 'memory' not in label:
+                label = 'memory_' + label
+
+        metric_name = prefix + label + sufix
+        if metric_name in metric_dic:
+            metric_dic[metric_name].append(entry)
+        else:
+            metric_dic[metric_name] = [entry]
+    return metric_dic
+
+
+def extract_labels(entries, payload, node_name):
+    default_label = 'node_name="%s"' % node_name
+    if len(entries) == 1:
+        return {entries[0]: '{%s}' % default_label}
+    entries_labels = {}
+    for entry in entries:
+        try:
+            sensor = payload[entry]['Sensor ID'].split()
+            sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
+            metric_label = [default_label,
+                            'sensor="%s"' % (sensor[0] + sensor_id)]
+            entries_labels[entry] = '{%s}' % ','.join(metric_label)
+        except Exception as e:
+            print(e)
+    return entries_labels
+
+
+def extract_values(entries, payload):
+    values = {}
+    for entry in entries:
+        try:
+            no_values = ['No Reading', 'Disabled']
+            if payload[entry]['Sensor Reading'] in no_values:
+                values[entry] = None
+            else:
+                sensor_values = payload[entry]['Sensor Reading'].split()
+                if len(sensor_values) > 1:
+                    values[entry] = sensor_values[0]
+                elif sensor_values[0] == "0h":
+                    values[entry] = 0
+                else:
+                    values[entry] = 1
+        except Exception as e:
+            print(e)
+    return values
+
+
 class Management(object):
 
     def __init__(self, payload, node_name):
         self.payload = payload
         self.node_name = node_name
 
-    def _metric_names(self):
-        prefix = 'baremetal_'
-        metric_dic = {}
-        for entry in self.payload:
-            e = entry.lower().split()
-            label = '_'.join(e[:-1])
-            metric_name = prefix + label
-            if metric_name in metric_dic:
-                metric_dic[metric_name].append(entry)
-            else:
-                metric_dic[metric_name] = [entry]
-        return metric_dic
-
-    def _extract_labels(self, entries):
-        deafult_label = 'node_name="%s"' % self.node_name
-        if len(entries) == 1:
-            return {entries[0]: '{%s}' % deafult_label}
-        entries_labels = {}
-        for entry in entries:
-            try:
-                sensor = self.payload[entry]['Sensor ID'].split()
-                sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
-                metric_label = [deafult_label,
-                                'sensor="%s"' % (sensor[0] + sensor_id)]
-                entries_labels[entry] = '{%s}' % ','.join(metric_label)
-            except Exception as e:
-                print(e)
-        return entries_labels
-
-    def _extract_values(self, entries):
-        entries_values = {}
-        for entry in entries:
-            try:
-                if self.payload[entry]['Sensor Reading'] == "0h":
-                    entries_values[entry] = 0
-                else:
-                    entries_values[entry] = 1
-            except Exception as e:
-                print(e)
-        return entries_values
-
     def prometheus_format(self):
         prometheus_info = []
-        available_metrics = self._metric_names()
+        available_metrics = metric_names(self.payload, 'baremetal_', '')
 
         for metric in available_metrics:
             prometheus_info.append(add_prometheus_type(metric, 'gauge'))
             entries = available_metrics[metric]
-            labels = self._extract_labels(entries)
-            values = self._extract_values(entries)
+            labels = extract_labels(entries, self.payload, self.node_name)
+            values = extract_values(entries, self.payload)
             for e in entries:
                 prometheus_info.append("%s%s %s" % (metric, labels[e],
                                                     values[e]))
@@ -79,38 +104,6 @@ class Temperature(object):
     def __init__(self, payload, node_name):
         self.payload = payload
         self.node_name = node_name
-
-    def _metric_names(self):
-        prefix = 'baremetal_'
-        sufix = 'temp_celcius'
-        metric_dic = {}
-        for entry in self.payload:
-            e = entry.split()[0]
-            label = e.lower()
-            metric_name = prefix + sufix
-            if label not in sufix:
-                metric_name = prefix + label + "_" + sufix
-            if metric_name in metric_dic:
-                metric_dic[metric_name].append(entry)
-            else:
-                metric_dic[metric_name] = [entry]
-        return metric_dic
-
-    def _extract_labels(self, entries):
-        deafult_label = 'node_name="%s"' % self.node_name
-        if len(entries) == 1:
-            return {entries[0]: '{%s}' % deafult_label}
-        entries_labels = {}
-        for entry in entries:
-            try:
-                sensor = self.payload[entry]['Sensor ID'].split()
-                sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
-                metric_label = [deafult_label,
-                                'sensor="%s"' % (sensor[0] + sensor_id)]
-                entries_labels[entry] = '{%s}' % ','.join(metric_label)
-            except Exception as e:
-                print(e)
-        return entries_labels
 
     def _extract_values(self, entries):
         entries_values = {}
@@ -126,12 +119,13 @@ class Temperature(object):
 
     def prometheus_format(self):
         prometheus_info = []
-        available_metrics = self._metric_names()
+        available_metrics = metric_names(self.payload, 'baremetal_',
+                                         '_celcius')
 
         for metric in available_metrics:
             prometheus_info.append(add_prometheus_type(metric, 'gauge'))
             entries = available_metrics[metric]
-            labels = self._extract_labels(entries)
+            labels = extract_labels(entries, self.payload, self.node_name)
             values = self._extract_values(entries)
             for e in entries:
                 prometheus_info.append("%s%s %s" % (metric, labels[e],
@@ -145,59 +139,15 @@ class System(object):
         self.payload = payload
         self.node_name = node_name
 
-    def _metric_names(self):
-        prefix = 'baremetal_system_'
-        metric_dic = {}
-        for entry in self.payload:
-            e = entry.lower().split()
-            label = '_'.join(e[:-1])
-            metric_name = prefix + label
-            if metric_name in metric_dic:
-                metric_dic[metric_name].append(entry)
-            else:
-                metric_dic[metric_name] = [entry]
-        return metric_dic
-
-    def _extract_labels(self, entries):
-        deafult_label = 'node_name="%s"' % self.node_name
-        if len(entries) == 1:
-            return {entries[0]: '{%s}' % deafult_label}
-        entries_labels = {}
-        for entry in entries:
-            try:
-                sensor = self.payload[entry]['Sensor ID'].split()
-                sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
-                metric_label = [deafult_label,
-                                'sensor="%s"' % (sensor[0] + sensor_id)]
-                entries_labels[entry] = '{%s}' % ','.join(metric_label)
-            except Exception as e:
-                print(e)
-        return entries_labels
-
-    def _extract_values(self, entries):
-        entries_values = {}
-        for entry in entries:
-            try:
-                if self.payload[entry]['Sensor Reading'] == 'No Reading':
-                    entries_values[entry] = None
-                else:
-                    if self.payload[entry]['Sensor Reading'] == "0h":
-                        entries_values[entry] = 0
-                    else:
-                        entries_values[entry] = 1
-            except Exception as e:
-                print(e)
-        return entries_values
-
     def prometheus_format(self):
         prometheus_info = []
-        available_metrics = self._metric_names()
+        available_metrics = metric_names(self.payload, 'baremetal_system_', '')
 
         for metric in available_metrics:
             prometheus_info.append(add_prometheus_type(metric, 'gauge'))
             entries = available_metrics[metric]
-            labels = self._extract_labels(entries)
-            values = self._extract_values(entries)
+            labels = extract_labels(entries, self.payload, self.node_name)
+            values = extract_values(entries, self.payload)
             for e in entries:
                 if values[e] is None:
                     continue
@@ -212,36 +162,6 @@ class Current(object):
         self.payload = payload
         self.node_name = node_name
 
-    def _metric_names(self):
-        prefix = 'baremetal_'
-        metric_dic = {}
-        for entry in self.payload:
-            e = re.sub(r'[\d]', '', entry.lower()).split()
-            label = '_'.join(e[:-1])
-            sufix = '_' + self.payload[entry]['Sensor Reading'].split()[-1]
-            metric_name = prefix + label + sufix.lower()
-            if metric_name in metric_dic:
-                metric_dic[metric_name].append(entry)
-            else:
-                metric_dic[metric_name] = [entry]
-        return metric_dic
-
-    def _extract_labels(self, entries):
-        deafult_label = 'node_name="%s"' % self.node_name
-        if len(entries) == 1:
-            return {entries[0]: '{%s}' % deafult_label}
-        entries_labels = {}
-        for entry in entries:
-            try:
-                sensor = self.payload[entry]['Sensor ID'].split()
-                sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
-                metric_label = [deafult_label,
-                                'sensor="%s"' % (sensor[0] + sensor_id)]
-                entries_labels[entry] = '{%s}' % ','.join(metric_label)
-            except Exception as e:
-                print(e)
-        return entries_labels
-
     def _extract_values(self, entries):
         entries_values = {}
         for entry in entries:
@@ -256,12 +176,12 @@ class Current(object):
 
     def prometheus_format(self):
         prometheus_info = []
-        available_metrics = self._metric_names()
+        available_metrics = metric_names(self.payload, 'baremetal_', '', True)
 
         for metric in available_metrics:
             prometheus_info.append(add_prometheus_type(metric, 'gauge'))
             entries = available_metrics[metric]
-            labels = self._extract_labels(entries)
+            labels = extract_labels(entries, self.payload, self.node_name)
             values = self._extract_values(entries)
             for e in entries:
                 prometheus_info.append("%s%s %s" % (metric, labels[e],
@@ -275,59 +195,15 @@ class Version(object):
         self.payload = payload
         self.node_name = node_name
 
-    def _metric_names(self):
-        prefix = 'baremetal_'
-        metric_dic = {}
-        for entry in self.payload:
-            e = entry.lower().split()
-            label = '_'.join(e[:-1])
-            metric_name = prefix + label
-            if metric_name in metric_dic:
-                metric_dic[metric_name].append(entry)
-            else:
-                metric_dic[metric_name] = [entry]
-        return metric_dic
-
-    def _extract_labels(self, entries):
-        deafult_label = 'node_name="%s"' % self.node_name
-        if len(entries) == 1:
-            return {entries[0]: '{%s}' % deafult_label}
-        entries_labels = {}
-        for entry in entries:
-            try:
-                sensor = self.payload[entry]['Sensor ID'].split()
-                sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
-                metric_label = [deafult_label,
-                                'sensor="%s"' % (sensor[0] + sensor_id)]
-                entries_labels[entry] = '{%s}' % ','.join(metric_label)
-            except Exception as e:
-                print(e)
-        return entries_labels
-
-    def _extract_values(self, entries):
-        entries_values = {}
-        for entry in entries:
-            try:
-                if self.payload[entry]['Sensor Reading'] == 'No Reading':
-                    entries_values[entry] = None
-                else:
-                    if self.payload[entry]['Sensor Reading'] == "0h":
-                        entries_values[entry] = 0
-                    else:
-                        entries_values[entry] = 1
-            except Exception as e:
-                print(e)
-        return entries_values
-
     def prometheus_format(self):
         prometheus_info = []
-        available_metrics = self._metric_names()
+        available_metrics = metric_names(self.payload, 'baremetal_', '')
 
         for metric in available_metrics:
             prometheus_info.append(add_prometheus_type(metric, 'gauge'))
             entries = available_metrics[metric]
-            labels = self._extract_labels(entries)
-            values = self._extract_values(entries)
+            labels = extract_labels(entries, self.payload, self.node_name)
+            values = extract_values(entries, self.payload)
             for e in entries:
                 if values[e] is None:
                     continue
@@ -342,61 +218,16 @@ class Memory(object):
         self.payload = payload
         self.node_name = node_name
 
-    def _metric_names(self):
-        prefix = 'baremetal_'
-        metric_dic = {}
-        for entry in self.payload:
-            e = entry.lower().split()
-            label = '_'.join(e[:-1])
-            if 'memory' not in label:
-                label = 'memory_' + label
-            metric_name = prefix + label.replace('-', '_')
-            if metric_name in metric_dic:
-                metric_dic[metric_name].append(entry)
-            else:
-                metric_dic[metric_name] = [entry]
-        return metric_dic
-
-    def _extract_labels(self, entries):
-        deafult_label = 'node_name="%s"' % self.node_name
-        if len(entries) == 1:
-            return {entries[0]: '{%s}' % deafult_label}
-        entries_labels = {}
-        for entry in entries:
-            try:
-                sensor = self.payload[entry]['Sensor ID'].split()
-                sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
-                metric_label = [deafult_label,
-                                'sensor="%s"' % (sensor[0] + sensor_id)]
-                entries_labels[entry] = '{%s}' % ','.join(metric_label)
-            except Exception as e:
-                print(e)
-        return entries_labels
-
-    def _extract_values(self, entries):
-        entries_values = {}
-        for entry in entries:
-            try:
-                if self.payload[entry]['Sensor Reading'] == 'No Reading':
-                    entries_values[entry] = None
-                else:
-                    if self.payload[entry]['Sensor Reading'] == "0h":
-                        entries_values[entry] = 0
-                    else:
-                        entries_values[entry] = 1
-            except Exception as e:
-                print(e)
-        return entries_values
-
     def prometheus_format(self):
         prometheus_info = []
-        available_metrics = self._metric_names()
+        available_metrics = metric_names(self.payload, 'baremetal_', '',
+                                         special_label='memory')
 
         for metric in available_metrics:
             prometheus_info.append(add_prometheus_type(metric, 'gauge'))
             entries = available_metrics[metric]
-            labels = self._extract_labels(entries)
-            values = self._extract_values(entries)
+            labels = extract_labels(entries, self.payload, self.node_name)
+            values = extract_values(entries, self.payload)
             for e in entries:
                 if values[e] is None:
                     continue
@@ -411,60 +242,15 @@ class Power(object):
         self.payload = payload
         self.node_name = node_name
 
-    def _metric_names(self):
-        prefix = 'baremetal_power_'
-        metric_dic = {}
-        for entry in self.payload:
-            e = entry.lower().split()
-            label = '_'.join(e[:-1])
-            metric_name = prefix + label.replace('-', '_')
-            if metric_name in metric_dic:
-                metric_dic[metric_name].append(entry)
-            else:
-                metric_dic[metric_name] = [entry]
-        return metric_dic
-
-    def _extract_labels(self, entries):
-        deafult_label = 'node_name="%s"' % self.node_name
-        if len(entries) == 1:
-            return {entries[0]: '{%s}' % deafult_label}
-        entries_labels = {}
-        for entry in entries:
-            try:
-                sensor = self.payload[entry]['Sensor ID'].split()
-                sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
-                metric_label = [deafult_label,
-                                'sensor="%s"' % (sensor[0] + sensor_id)]
-                entries_labels[entry] = '{%s}' % ','.join(metric_label)
-            except Exception as e:
-                print(e)
-        return entries_labels
-
-    def _extract_values(self, entries):
-        entries_values = {}
-        for entry in entries:
-            try:
-                no_values = ['No Reading', 'Disabled']
-                if self.payload[entry]['Sensor Reading'] in no_values:
-                    entries_values[entry] = None
-                else:
-                    if self.payload[entry]['Sensor Reading'] == "0h":
-                        entries_values[entry] = 0
-                    else:
-                        entries_values[entry] = 1
-            except Exception as e:
-                print(e)
-        return entries_values
-
     def prometheus_format(self):
         prometheus_info = []
-        available_metrics = self._metric_names()
+        available_metrics = metric_names(self.payload, 'baremetal_power_', '')
 
         for metric in available_metrics:
             prometheus_info.append(add_prometheus_type(metric, 'gauge'))
             entries = available_metrics[metric]
-            labels = self._extract_labels(entries)
-            values = self._extract_values(entries)
+            labels = extract_labels(entries, self.payload, self.node_name)
+            values = extract_values(entries, self.payload)
             for e in entries:
                 if values[e] is None:
                     continue
@@ -479,60 +265,15 @@ class Watchdog2(object):
         self.payload = payload
         self.node_name = node_name
 
-    def _metric_names(self):
-        prefix = 'baremetal_'
-        metric_dic = {}
-        for entry in self.payload:
-            e = entry.lower().split()
-            label = '_'.join(e[:-1])
-            metric_name = prefix + label.replace('-', '_')
-            if metric_name in metric_dic:
-                metric_dic[metric_name].append(entry)
-            else:
-                metric_dic[metric_name] = [entry]
-        return metric_dic
-
-    def _extract_labels(self, entries):
-        deafult_label = 'node_name="%s"' % self.node_name
-        if len(entries) == 1:
-            return {entries[0]: '{%s}' % deafult_label}
-        entries_labels = {}
-        for entry in entries:
-            try:
-                sensor = self.payload[entry]['Sensor ID'].split()
-                sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
-                metric_label = [deafult_label,
-                                'sensor="%s"' % (sensor[0] + sensor_id)]
-                entries_labels[entry] = '{%s}' % ','.join(metric_label)
-            except Exception as e:
-                print(e)
-        return entries_labels
-
-    def _extract_values(self, entries):
-        entries_values = {}
-        for entry in entries:
-            try:
-                no_values = ['No Reading', 'Disabled']
-                if self.payload[entry]['Sensor Reading'] in no_values:
-                    entries_values[entry] = None
-                else:
-                    if self.payload[entry]['Sensor Reading'] == "0h":
-                        entries_values[entry] = 0
-                    else:
-                        entries_values[entry] = 1
-            except Exception as e:
-                print(e)
-        return entries_values
-
     def prometheus_format(self):
         prometheus_info = []
-        available_metrics = self._metric_names()
+        available_metrics = metric_names(self.payload, 'baremetal_', '')
 
         for metric in available_metrics:
             prometheus_info.append(add_prometheus_type(metric, 'gauge'))
             entries = available_metrics[metric]
-            labels = self._extract_labels(entries)
-            values = self._extract_values(entries)
+            labels = extract_labels(entries, self.payload, self.node_name)
+            values = extract_values(entries, self.payload)
             for e in entries:
                 if values[e] is None:
                     continue
@@ -546,68 +287,17 @@ class Fan(object):
         self.payload = payload
         self.node_name = node_name
 
-    def _metric_names(self):
-        prefix = 'baremetal_'
-        metric_dic = {}
-        for entry in self.payload:
-            sufix = ''
-            e = re.sub(r'[\d].*$', '', entry.lower())
-            e = re.sub(r'[\(\)]', '', e).split()
-            label = '_'.join(e)
-            label_unit = self.payload[entry]['Sensor Reading'].split()
-            if len(label_unit) > 1:
-                sufix = '_' + label_unit[-1].lower()
-            metric_name = prefix + label.replace('-', '_') + sufix
-            if metric_name in metric_dic:
-                metric_dic[metric_name].append(entry)
-            else:
-                metric_dic[metric_name] = [entry]
-        return metric_dic
-
-    def _extract_labels(self, entries):
-        deafult_label = 'node_name="%s"' % self.node_name
-        if len(entries) == 1:
-            return {entries[0]: '{%s}' % deafult_label}
-        entries_labels = {}
-        for entry in entries:
-            try:
-                sensor = self.payload[entry]['Sensor ID'].split()
-                sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
-                metric_label = [deafult_label,
-                                'sensor="%s"' % (sensor[0] + sensor_id)]
-                entries_labels[entry] = '{%s}' % ','.join(metric_label)
-            except Exception as e:
-                print(e)
-        return entries_labels
-
-    def _extract_values(self, entries):
-        entries_values = {}
-        for entry in entries:
-            try:
-                no_values = ['No Reading', 'Disabled']
-                if self.payload[entry]['Sensor Reading'] in no_values:
-                    entries_values[entry] = None
-                else:
-                    values = self.payload[entry]['Sensor Reading'].split()
-                    if len(values) > 1:
-                        entries_values[entry] = values[0]
-                    elif values[0] == "0h":
-                        entries_values[entry] = 0
-                    else:
-                        entries_values[entry] = 1
-            except Exception as e:
-                print(e)
-        return entries_values
-
     def prometheus_format(self):
         prometheus_info = []
-        available_metrics = self._metric_names()
+        available_metrics = metric_names(self.payload, 'baremetal_', '',
+                                         extract_unit=True,
+                                         special_label='fan')
 
         for metric in available_metrics:
             prometheus_info.append(add_prometheus_type(metric, 'gauge'))
             entries = available_metrics[metric]
-            labels = self._extract_labels(entries)
-            values = self._extract_values(entries)
+            labels = extract_labels(entries, self.payload, self.node_name)
+            values = extract_values(entries, self.payload)
             for e in entries:
                 if values[e] is None:
                     continue

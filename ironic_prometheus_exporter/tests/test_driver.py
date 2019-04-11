@@ -11,6 +11,14 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
     def setUp(self):
         super(TestPrometheusFileNotifier, self).setUp()
 
+    def tearDown(self):
+        super(TestPrometheusFileNotifier, self).tearDown()
+        DIR = '/tmp/ironic_prometheus_exporter'
+        all_files = [name for name in os.listdir(DIR)
+                     if os.path.isfile(os.path.join(DIR, name))]
+        for f in all_files:
+            os.remove(os.path.join(DIR, f))
+
     def test_instanciate(self):
         self.config(files_dir='/tmp/ironic_prometheus_exporter',
                     group='oslo_messaging_notifications')
@@ -46,9 +54,8 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
                      if os.path.isfile(os.path.join(DIR, name))]
         self.assertEqual(node1, node2)
         self.assertEqual(len(all_files), 1)
-        self.assertTrue(node1 and node2 in all_files)
-        for f in all_files:
-            os.remove(os.path.join(DIR, f))
+        self.assertTrue(node1 in all_files)
+        self.assertTrue(node2 in all_files)
 
     def test_messages_from_different_nodes(self):
         self.config(files_dir='/tmp/ironic_prometheus_exporter',
@@ -70,6 +77,5 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
         all_files = [name for name in os.listdir(DIR)
                      if os.path.isfile(os.path.join(DIR, name))]
         self.assertEqual(len(all_files), 2)
-        self.assertTrue(node1 and node2 in all_files)
-        for f in all_files:
-            os.remove(os.path.join(DIR, f))
+        self.assertTrue(node1 in all_files)
+        self.assertTrue(node2 in all_files)
