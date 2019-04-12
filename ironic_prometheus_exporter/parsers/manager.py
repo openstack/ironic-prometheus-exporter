@@ -4,23 +4,23 @@ from ironic_prometheus_exporter.parsers import ipmi
 class ParserManager(object):
 
     def __init__(self, data):
+        self.driver_information = []
+        if data['event_type'] == 'hardware.ipmi.metrics':
+            self.driver_information = self._ipmi_driver(data)
 
+    def _ipmi_driver(self, data):
         node_name = data['payload']['node_name']
         payload = data['payload']['payload']
-        self.ipmi_objects = [
-            ipmi.Management(payload['Management'], node_name),
-            ipmi.Temperature(payload['Temperature'], node_name),
-            ipmi.System(payload['System'], node_name),
-            ipmi.Current(payload['Current'], node_name),
-            ipmi.Version(payload['Version'], node_name),
-            ipmi.Memory(payload['Memory'], node_name),
-            ipmi.Power(payload['Power'], node_name),
-            ipmi.Watchdog2(payload['Watchdog2'], node_name),
-            ipmi.Fan(payload['Fan'], node_name)
-        ]
+        ipmi_information = []
+        for category in payload:
+            if hasattr(ipmi, category.lower()):
+                category_output = getattr(ipmi, category.lower())(
+                    payload[category], node_name)
+                ipmi_information.append(category_output)
+        return ipmi_information
 
     def merge_information(self):
         info = ''
-        for obj in self.ipmi_objects:
-            info += obj.prometheus_format() + '\n'
+        for obj in self.driver_information:
+            info += obj + '\n'
         return info.rstrip('\n')

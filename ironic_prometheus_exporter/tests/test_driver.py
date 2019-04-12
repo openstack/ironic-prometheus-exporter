@@ -1,3 +1,4 @@
+import fixtures
 import json
 import os
 import oslo_messaging
@@ -11,28 +12,22 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
     def setUp(self):
         super(TestPrometheusFileNotifier, self).setUp()
 
-    def tearDown(self):
-        super(TestPrometheusFileNotifier, self).tearDown()
-        DIR = '/tmp/ironic_prometheus_exporter'
-        all_files = [name for name in os.listdir(DIR)
-                     if os.path.isfile(os.path.join(DIR, name))]
-        for f in all_files:
-            os.remove(os.path.join(DIR, f))
-
     def test_instanciate(self):
-        self.config(files_dir='/tmp/ironic_prometheus_exporter',
+        temp_dir = self.useFixture(fixtures.TempDir()).path
+        self.config(location=temp_dir,
                     group='oslo_messaging_notifications')
         transport = oslo_messaging.get_notification_transport(self.conf)
         oslo_messaging.Notifier(transport, driver='prometheus_exporter',
                                 topics=['my_topics'])
 
-        self.assertEqual(self.conf.oslo_messaging_notifications.files_dir,
-                         "/tmp/ironic_prometheus_exporter")
+        self.assertEqual(self.conf.oslo_messaging_notifications.location,
+                         temp_dir)
         self.assertTrue(os.path.isdir(
-            self.conf.oslo_messaging_notifications.files_dir))
+            self.conf.oslo_messaging_notifications.location))
 
     def test_messages_from_same_node(self):
-        self.config(files_dir='/tmp/ironic_prometheus_exporter',
+        temp_dir = self.useFixture(fixtures.TempDir()).path
+        self.config(location=temp_dir,
                     group='oslo_messaging_notifications')
         transport = oslo_messaging.get_notification_transport(self.conf)
         driver = PrometheusFileDriver(self.conf, None, transport)
@@ -49,7 +44,7 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
         driver.notify(None, msg1, 'info', 0)
         driver.notify(None, msg2, 'info', 0)
 
-        DIR = self.conf.oslo_messaging_notifications.files_dir
+        DIR = self.conf.oslo_messaging_notifications.location
         all_files = [name for name in os.listdir(DIR)
                      if os.path.isfile(os.path.join(DIR, name))]
         self.assertEqual(node1, node2)
@@ -58,7 +53,8 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
         self.assertTrue(node2 in all_files)
 
     def test_messages_from_different_nodes(self):
-        self.config(files_dir='/tmp/ironic_prometheus_exporter',
+        temp_dir = self.useFixture(fixtures.TempDir()).path
+        self.config(location=temp_dir,
                     group='oslo_messaging_notifications')
         transport = oslo_messaging.get_notification_transport(self.conf)
         driver = PrometheusFileDriver(self.conf, None, transport)
@@ -73,7 +69,7 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
         driver.notify(None, msg1, 'info', 0)
         driver.notify(None, msg2, 'info', 0)
 
-        DIR = self.conf.oslo_messaging_notifications.files_dir
+        DIR = self.conf.oslo_messaging_notifications.location
         all_files = [name for name in os.listdir(DIR)
                      if os.path.isfile(os.path.join(DIR, name))]
         self.assertEqual(len(all_files), 2)
