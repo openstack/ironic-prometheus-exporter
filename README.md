@@ -14,13 +14,14 @@ $ python setup.py install
 ```
 3- Verify if the driver is installed
 ```
-$ python verify_installation.py
+$ pip install entry_point_inspector
+$ epi group show oslo.messaging.notify.drivers
+
 ```
 Output in case of a successful instalation:
-`prometheus_exporter driver found.`
+`prometheus_exporter` is listed in the `Name` column and the `Error` column should be empty.
 Output in case of an unsuccessful instalation:
-`prometheus_exporter driver not found.`
-`Available drivers: ['log', 'messagingv2', 'noop', 'routing', 'test', 'messaging']`
+`prometheus_exporter` is listed in the `Name` column and the `Error` column will have more information.
 
 
 ### Configuration ###
@@ -29,8 +30,11 @@ After install the driver you will need to update the :ironic.conf: and add
 :file_path: option (the file extension should be .json)
 
 ```
+[conductor]
+send_sensor_data=true
+
 [oslo_messaging_notifications]
 driver = prometheus_exporter
 transport_url = fake://
-file_path=/tmp/ironic_prometheus_exporter/metrics.json
+location=/tmp/ironic_prometheus_exporter
 ```
