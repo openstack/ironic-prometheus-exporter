@@ -49,8 +49,8 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
                      if os.path.isfile(os.path.join(DIR, name))]
         self.assertEqual(node1, node2)
         self.assertEqual(len(all_files), 1)
-        self.assertTrue(node1 in all_files)
-        self.assertTrue(node2 in all_files)
+        self.assertIn(node1, all_files)
+        self.assertIn(node2, all_files)
 
     def test_messages_from_different_nodes(self):
         temp_dir = self.useFixture(fixtures.TempDir()).path
@@ -73,5 +73,5 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
         all_files = [name for name in os.listdir(DIR)
                      if os.path.isfile(os.path.join(DIR, name))]
         self.assertEqual(len(all_files), 2)
-        self.assertTrue(node1 in all_files)
-        self.assertTrue(node2 in all_files)
+        self.assertIn(node1, all_files)
+        self.assertIn(node2, all_files)

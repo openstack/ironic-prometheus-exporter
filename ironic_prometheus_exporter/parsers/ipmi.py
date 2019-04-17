@@ -15,9 +15,14 @@ def add_prometheus_type(name, metric_type):
     return '# TYPE %s %s' % (name, metric_type)
 
 
-def metric_names(payload, prefix, sufix, extract_unit=False,
-                 special_label=None):
+def metric_names(payload, prefix, sufix, **kwargs):
+    LOG.info('metric_names function called with payload=%s' % str(payload))
+    LOG.info('prefix=%s | sufix=%s | kwargs=%s' %
+             (prefix, sufix, str(kwargs.items())))
+
     metric_dic = {}
+    extract_unit = kwargs.get('extract_unit')
+    special_label = kwargs.get('special_label')
     for entry in payload:
         if special_label == 'fan':
             e = re.sub(r'[\d].*$', '', entry.lower())
@@ -61,6 +66,8 @@ def extract_labels(entries, payload, node_name):
      'Temp (0x2)': '{node_name=...,sensor=Temp2}'}
 
     """
+    LOG.info('extract_labels function called with: entries=%s | payload=%s | \
+             node_name=%s' % (str(entries), str(payload), node_name))
     default_label = 'node_name="%s"' % node_name
     if len(entries) == 1:
         return {entries[0]: '{%s}' % default_label}
@@ -73,11 +80,13 @@ def extract_labels(entries, payload, node_name):
                             'sensor="%s"' % (sensor[0] + sensor_id)]
             entries_labels[entry] = '{%s}' % ','.join(metric_label)
         except Exception as e:
-            LOG.error(e)
+            LOG.exception(e)
     return entries_labels
 
 
 def extract_values(entries, payload, use_ipmi_format=True):
+    LOG.info('extract_values function called with: entries=%s | payload=%s |'
+             % (str(entries), str(payload)))
     values = {}
     for entry in entries:
         try:
@@ -97,12 +106,11 @@ def extract_values(entries, payload, use_ipmi_format=True):
                 else:
                     values[entry] = 1
         except Exception as e:
-            LOG.error(e)
+            LOG.exception(e)
     return values
 
 
-def prometheus_format(payload, node_name, available_metrics,
-                      use_ipmi_format=True):
+def prometheus_format(payload, node_name, available_metrics, use_ipmi_format):
     prometheus_info = []
     for metric in available_metrics:
         entries = available_metrics[metric]
@@ -119,51 +127,38 @@ def prometheus_format(payload, node_name, available_metrics,
     return '\n'.join(prometheus_info)
 
 
-def management(payload, node_name):
-    available_metrics = metric_names(payload, 'baremetal_', '')
-    return prometheus_format(payload, node_name, available_metrics)
+CATEGORY_PARAMS = {
+    'management': {'prefix': 'baremetal_', 'sufix': '',
+                   'extra_params': {}, 'use_ipmi_format': True},
+    'temperature': {'prefix': 'baremetal_', 'sufix': '_celcius',
+                    'extra_params': {}, 'use_ipmi_format': False},
+    'system': {'prefix': 'baremetal_system_', 'sufix': '', 'extra_params': {},
+               'use_ipmi_format': True},
+    'current': {'prefix': 'baremetal_', 'sufix': '', 'extra_params': {},
+                'use_ipmi_format': False},
+    'version': {'prefix': 'baremetal_', 'sufix': '', 'extra_params': {},
+                'use_ipmi_format': True},
+    'memory': {'prefix': 'baremetal_', 'sufix': '',
+               'extra_params': {'special_label': 'memory'},
+               'use_ipmi_format': True},
+    'power': {'prefix': 'baremetal_power_', 'sufix': '', 'extra_params': {},
+              'use_ipmi_format': True},
+    'watchdog2': {'prefix': 'baremetal_', 'sufix': '', 'extra_params': {},
+                  'use_ipmi_format': True},
+    'fan': {'prefix': 'baremetal_', 'sufix': '',
+            'extra_params': {'extract_unit': True, 'special_label': 'fan'},
+            'use_ipmi_format': True}
+}
 
 
-def temperature(payload, node_name):
-    available_metrics = metric_names(payload, 'baremetal_', '_celcius')
-    return prometheus_format(payload, node_name, available_metrics,
-                             use_ipmi_format=False)
-
-
-def system(payload, node_name):
-    available_metrics = metric_names(payload, 'baremetal_system_', '')
-    return prometheus_format(payload, node_name, available_metrics)
-
-
-def current(payload, node_name):
-    available_metrics = metric_names(payload, 'baremetal_', '')
-    return prometheus_format(payload, node_name, available_metrics,
-                             use_ipmi_format=False)
-
-
-def version(payload, node_name):
-    available_metrics = metric_names(payload, 'baremetal_', '')
-    return prometheus_format(payload, node_name, available_metrics)
-
-
-def memory(payload, node_name):
-    available_metrics = metric_names(payload, 'baremetal_', '',
-                                     special_label='memory')
-    return prometheus_format(payload, node_name, available_metrics)
-
-
-def power(payload, node_name):
-    available_metrics = metric_names(payload, 'baremetal_power_', '')
-    return prometheus_format(payload, node_name, available_metrics)
-
-
-def watchdog2(payload, node_name):
-    available_metrics = metric_names(payload, 'baremetal_', '')
-    return prometheus_format(payload, node_name, available_metrics)
-
-
-def fan(payload, node_name):
-    available_metrics = metric_names(payload, 'baremetal_', '',
-                                     extract_unit=True,
-                                     special_label='fan')
-    return prometheus_format(payload, node_name, available_metrics)
+def category(category_name, payload, node_name):
+    if category_name in CATEGORY_PARAMS:
+        prefix = CATEGORY_PARAMS[category_name]['prefix']
+        sufix = CATEGORY_PARAMS[category_name]['sufix']
+        extra = CATEGORY_PARAMS[category_name]['extra_params']
+        available_metrics = metric_names(payload, prefix, sufix, **extra)
+        use_ipmi_format = CATEGORY_PARAMS[category_name]['use_ipmi_format']
+        return prometheus_format(payload, node_name, available_metrics,
+                                 use_ipmi_format)
+    else:
+        return None

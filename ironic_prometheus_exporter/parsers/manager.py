@@ -13,9 +13,9 @@ class ParserManager(object):
         payload = data['payload']['payload']
         ipmi_information = []
         for category in payload:
-            if hasattr(ipmi, category.lower()):
-                category_output = getattr(ipmi, category.lower())(
-                    payload[category], node_name)
+            category_output = ipmi.category(category.lower(),
+                                            payload[category], node_name)
+            if category_output:
                 ipmi_information.append(category_output)
         return ipmi_information
 

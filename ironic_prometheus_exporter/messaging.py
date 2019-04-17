@@ -23,8 +23,11 @@ class PrometheusFileDriver(notifier.Driver):
 
     def __init__(self, conf, topics, transport):
         self.location = conf.oslo_messaging_notifications.location
+        self.temporary_location = '/tmp/temporary_data'
         if not os.path.exists(self.location):
             os.makedirs(self.location)
+        if not os.path.exists(self.temporary_location):
+            os.makedirs(self.temporary_location)
         super(PrometheusFileDriver, self).__init__(conf, topics, transport)
 
     def notify(self, ctxt, message, priority, retry):
@@ -32,8 +35,11 @@ class PrometheusFileDriver(notifier.Driver):
             node_parser_manager = manager.ParserManager(message)
             node_metrics = node_parser_manager.merge_information()
             node_name = message['payload']['node_name']
-            with open(os.path.join(self.location, node_name), 'w') as file:
+            tmpFile = os.path.join(self.temporary_location, node_name)
+            nodeFile = os.path.join(self.location, node_name)
+            with open(tmpFile, 'w') as file:
                 file.write(node_metrics)
+            os.rename(tmpFile, nodeFile)
         except Exception as e:
             LOG.error(e)
 
