@@ -21,7 +21,7 @@ class TestPayloadsParser(unittest.TestCase):
         management_parser = ipmi.category('management',
                                           self.payload['Management'],
                                           self.node_name)
-        self.assertEqual(len(management_parser.split('\n')), 2)
+        self.assertEqual(len(management_parser.split('\n')), 3)
 
     def test_temperature_parser(self):
         temperature_metrics_name = ipmi.metric_names(
@@ -35,7 +35,7 @@ class TestPayloadsParser(unittest.TestCase):
         temperature_parser = ipmi.category('temperature',
                                            self.payload['Temperature'],
                                            self.node_name)
-        self.assertEqual(len(temperature_parser.split('\n')), 7)
+        self.assertEqual(len(temperature_parser.split('\n')), 10)
 
     def test_system_parser(self):
         system_metrics_name = ipmi.metric_names(self.payload['System'],
@@ -46,7 +46,7 @@ class TestPayloadsParser(unittest.TestCase):
 
         system_parser = ipmi.category('system', self.payload['System'],
                                       self.node_name)
-        self.assertEqual(len(system_parser.split('\n')), 2)
+        self.assertEqual(len(system_parser.split('\n')), 3)
 
     def test_current_parser(self):
         current_metrics_name = ipmi.metric_names(self.payload['Current'],
@@ -57,7 +57,7 @@ class TestPayloadsParser(unittest.TestCase):
 
         current_parser = ipmi.category('current', self.payload['Current'],
                                        self.node_name)
-        self.assertEqual(len(current_parser.split('\n')), 5)
+        self.assertEqual(len(current_parser.split('\n')), 7)
 
     def test_version_parser(self):
         version_metrics_name = ipmi.metric_names(self.payload['Version'],
@@ -69,7 +69,7 @@ class TestPayloadsParser(unittest.TestCase):
 
         version_parser = ipmi.category('version', self.payload['Version'],
                                        self.node_name)
-        self.assertEqual(len(version_parser.split('\n')), 4)
+        self.assertEqual(len(version_parser.split('\n')), 6)
 
     def test_memory_parser(self):
         memory_metrics_name = ipmi.metric_names(self.payload['Memory'],
@@ -92,7 +92,7 @@ class TestPayloadsParser(unittest.TestCase):
 
         memory_parser = ipmi.category('memory', self.payload['Memory'],
                                       self.node_name)
-        self.assertEqual(len(memory_parser.split('\n')), 16)
+        self.assertEqual(len(memory_parser.split('\n')), 24)
 
     def test_power_parser(self):
         power_metrics_name = ipmi.metric_names(self.payload['Power'],
@@ -103,7 +103,7 @@ class TestPayloadsParser(unittest.TestCase):
 
         power_parser = ipmi.category('power', self.payload['Power'],
                                      self.node_name)
-        self.assertEqual(len(power_parser.split('\n')), 3)
+        self.assertEqual(len(power_parser.split('\n')), 4)
 
     def test_watchdog2_parser(self):
         watchdog2_metrics_name = ipmi.metric_names(self.payload['Watchdog2'],
@@ -114,7 +114,7 @@ class TestPayloadsParser(unittest.TestCase):
 
         watchdog_parser = ipmi.category('watchdog2', self.payload['Watchdog2'],
                                         self.node_name)
-        self.assertEqual(len(watchdog_parser.split('\n')), 4)
+        self.assertEqual(len(watchdog_parser.split('\n')), 6)
 
     def test_fan_parser(self):
         fan_metrics_name = ipmi.metric_names(self.payload['Fan'], 'baremetal_',
@@ -125,7 +125,7 @@ class TestPayloadsParser(unittest.TestCase):
         self.assertIn('baremetal_fan_rpm', fan_metrics_name)
 
         fan_parser = ipmi.category('fan', self.payload['Fan'], self.node_name)
-        self.assertEqual(len(fan_parser.split('\n')), 19)
+        self.assertEqual(len(fan_parser.split('\n')), 21)
 
 
 class TestIpmiManager(unittest.TestCase):
@@ -133,4 +133,4 @@ class TestIpmiManager(unittest.TestCase):
     def test_manager(self):
         node_manager = manager.ParserManager(DATA)
         node_metrics = node_manager.merge_information()
-        self.assertEqual(len(node_metrics.split('\n')), 62)
+        self.assertEqual(len(node_metrics.split('\n')), 84)

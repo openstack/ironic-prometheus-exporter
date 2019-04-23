@@ -11,6 +11,10 @@ import re
 LOG = logging.getLogger(__name__)
 
 
+def add_prometheus_help(name, description):
+    return'# HELP %s %s' % (name, description)
+
+
 def add_prometheus_type(name, metric_type):
     return '# TYPE %s %s' % (name, metric_type)
 
@@ -41,7 +45,9 @@ def metric_names(payload, prefix, sufix, **kwargs):
             if 'mem' not in label and 'memory' not in label:
                 label = 'memory_' + label
 
-        metric_name = prefix + label + sufix
+        metric_name = re.sub(r'[\W]', '_', prefix + label + sufix)
+        if metric_name[0].isdigit():
+            metric_name = metric_name.lstrip('0123456789')
         if metric_name in metric_dic:
             metric_dic[metric_name].append(entry)
         else:
@@ -55,7 +61,7 @@ def extract_labels(entries, payload, node_name):
     If a metric has many entries we add the 'Sensor ID' information as label
     otherwise we will only use the default label that is the node name.
 
-    e.g: for Temperature we have two entries for baremetal_temperature_celcius
+    e.g: for Temperature we have two entries for baremetal_temperature_celsius
     metric ('Temp (0x1)' and 'Temp (0x2)') and one entry for 'Inlet Temp (0x5)'
     and other for 'Exhaust Temp (0x6)', this will produce a dictionary where
     the keys are the entries and the values are the respective label to be used
@@ -70,14 +76,16 @@ def extract_labels(entries, payload, node_name):
              node_name=%s' % (str(entries), str(payload), node_name))
     default_label = 'node_name="%s"' % node_name
     if len(entries) == 1:
+        default_label += ',entity_id=%s' % payload[entries[0]]['Entity ID']
         return {entries[0]: '{%s}' % default_label}
     entries_labels = {}
     for entry in entries:
         try:
-            sensor = payload[entry]['Sensor ID'].split()
-            sensor_id = str(int(re.sub(r'[\(\)]', '', sensor[-1]), 0))
+            entity_id = payload[entry]['Entity ID']
+            sensor_id = payload[entry]['Sensor ID']
             metric_label = [default_label,
-                            'sensor="%s"' % (sensor[0] + sensor_id)]
+                            'entity_id="%s"' % entity_id,
+                            'sensor_id="%s"' % sensor_id]
             entries_labels[entry] = '{%s}' % ','.join(metric_label)
         except Exception as e:
             LOG.exception(e)
@@ -119,6 +127,7 @@ def prometheus_format(payload, node_name, available_metrics, use_ipmi_format):
                                 use_ipmi_format=use_ipmi_format)
         if all(v is None for v in values.values()):
             continue
+        prometheus_info.append(add_prometheus_help(metric, ''))
         prometheus_info.append(add_prometheus_type(metric, 'gauge'))
         for e in entries:
             if values[e] is None:
@@ -130,7 +139,7 @@ def prometheus_format(payload, node_name, available_metrics, use_ipmi_format):
 CATEGORY_PARAMS = {
     'management': {'prefix': 'baremetal_', 'sufix': '',
                    'extra_params': {}, 'use_ipmi_format': True},
-    'temperature': {'prefix': 'baremetal_', 'sufix': '_celcius',
+    'temperature': {'prefix': 'baremetal_', 'sufix': '_celsius',
                     'extra_params': {}, 'use_ipmi_format': False},
     'system': {'prefix': 'baremetal_system_', 'sufix': '', 'extra_params': {},
                'use_ipmi_format': True},
