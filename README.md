@@ -5,7 +5,7 @@
 
 1 - Clone the repository in the machine where ironic is installed.
 ```
-$ git clone https://github.com/metalkube/ironic-prometheus-exporter
+$ git clone https://github.com/metal3-io/ironic-prometheus-exporter
 ```
 2 - Install the driver (may require sudo permisions)
 ```
