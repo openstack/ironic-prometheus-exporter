@@ -3,11 +3,11 @@ import logging
 import os
 
 from flask import abort, Flask, Response
-app = Flask(__name__)
+application = Flask(__name__)
 LOG = logging.getLogger(__name__)
 
 
-@app.route('/metrics', methods=['GET'])
+@application.route('/metrics', methods=['GET'])
 def prometheus_metrics():
     try:
         config = configparser.ConfigParser()
@@ -28,4 +28,4 @@ def prometheus_metrics():
 
 
 if __name__ == '__main__':
-    app.run()
+    application.run()

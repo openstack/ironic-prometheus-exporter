@@ -62,3 +62,10 @@ $ export FLASK_RUN_PORT=5000
 ```
 $ python -m flask run &
 ```
+
+**Running under uWSGI**
+Reproduce the Steps 1 and 2 (You don't need to set `FLASK_APP` variable) and run the command below:
+```
+$ uwsgi --socket $FLASK_RUN_HOST:$FLASK_RUN_PORT --protocol=http -w ironic_prometheus_exporter.app.wsgi
+
+```

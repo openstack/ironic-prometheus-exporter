@@ -1,6 +1,8 @@
 import logging
 import re
 
+from prometheus_client import Gauge
+
 # NOTE (iurygregory): most of the sensor readings come in the ipmi format
 # each type of sensor consider a different range of values that aren't integers
 # (eg: 0h, 2eh), 0h will be published as 0 and the other values as 1, this way
@@ -9,14 +11,6 @@ import re
 # ipmi-second-gen-interface-spec-v2-rev1-1.html
 
 LOG = logging.getLogger(__name__)
-
-
-def add_prometheus_help(name, description):
-    return'# HELP %s %s' % (name, description)
-
-
-def add_prometheus_type(name, metric_type):
-    return '# TYPE %s %s' % (name, metric_type)
 
 
 def metric_names(payload, prefix, sufix, **kwargs):
@@ -59,7 +53,8 @@ def extract_labels(entries, payload, node_name):
     """ This function extract the labels to be used by a metric
 
     If a metric has many entries we add the 'Sensor ID' information as label
-    otherwise we will only use the default label that is the node name.
+    otherwise we will only use the default label that is the 'node_name' and
+    'Entity ID'.
 
     e.g: for Temperature we have two entries for baremetal_temperature_celsius
     metric ('Temp (0x1)' and 'Temp (0x2)') and one entry for 'Inlet Temp (0x5)'
@@ -71,22 +66,23 @@ def extract_labels(entries, payload, node_name):
      'Temp (0x1)': '{node_name=...,sensor=Temp1}',
      'Temp (0x2)': '{node_name=...,sensor=Temp2}'}
 
+    returns: a dictionarty of dictionaries {<entry>: {label_name: label_value}}
     """
     LOG.info('extract_labels function called with: entries=%s | payload=%s | \
              node_name=%s' % (str(entries), str(payload), node_name))
-    default_label = 'node_name="%s"' % node_name
     if len(entries) == 1:
-        default_label += ',entity_id=%s' % payload[entries[0]]['Entity ID']
-        return {entries[0]: '{%s}' % default_label}
+        labels = {'node_name': node_name,
+                  'entity_id': payload[entries[0]]['Entity ID']}
+        return {entries[0]: labels}
     entries_labels = {}
     for entry in entries:
         try:
             entity_id = payload[entry]['Entity ID']
             sensor_id = payload[entry]['Sensor ID']
-            metric_label = [default_label,
-                            'entity_id="%s"' % entity_id,
-                            'sensor_id="%s"' % sensor_id]
-            entries_labels[entry] = '{%s}' % ','.join(metric_label)
+            metric_label = {'node_name': node_name,
+                            'entity_id': entity_id,
+                            'sensor_id': sensor_id}
+            entries_labels[entry] = metric_label
         except Exception as e:
             LOG.exception(e)
     return entries_labels
@@ -118,8 +114,8 @@ def extract_values(entries, payload, use_ipmi_format=True):
     return values
 
 
-def prometheus_format(payload, node_name, available_metrics, use_ipmi_format):
-    prometheus_info = []
+def prometheus_format(payload, node_name, ipmi_metric_registry,
+                      available_metrics, use_ipmi_format):
     for metric in available_metrics:
         entries = available_metrics[metric]
         labels = extract_labels(entries, payload, node_name)
@@ -127,13 +123,12 @@ def prometheus_format(payload, node_name, available_metrics, use_ipmi_format):
                                 use_ipmi_format=use_ipmi_format)
         if all(v is None for v in values.values()):
             continue
-        prometheus_info.append(add_prometheus_help(metric, ''))
-        prometheus_info.append(add_prometheus_type(metric, 'gauge'))
+        g = Gauge(metric, '', labelnames=labels.get(entries[0]).keys(),
+                  registry=ipmi_metric_registry)
         for e in entries:
             if values[e] is None:
                 continue
-            prometheus_info.append("%s%s %s" % (metric, labels[e], values[e]))
-    return '\n'.join(prometheus_info)
+            g.labels(**labels[e]).set(values[e])
 
 
 CATEGORY_PARAMS = {
@@ -160,14 +155,12 @@ CATEGORY_PARAMS = {
 }
 
 
-def category(category_name, payload, node_name):
+def category_registry(category_name, payload, node_name, ipmi_metric_registry):
     if category_name in CATEGORY_PARAMS:
         prefix = CATEGORY_PARAMS[category_name]['prefix']
         sufix = CATEGORY_PARAMS[category_name]['sufix']
         extra = CATEGORY_PARAMS[category_name]['extra_params']
         available_metrics = metric_names(payload, prefix, sufix, **extra)
         use_ipmi_format = CATEGORY_PARAMS[category_name]['use_ipmi_format']
-        return prometheus_format(payload, node_name, available_metrics,
-                                 use_ipmi_format)
-    else:
-        return None
+        prometheus_format(payload, node_name, ipmi_metric_registry,
+                          available_metrics, use_ipmi_format)

@@ -1,9 +1,10 @@
 import logging
 import os
 
-from ironic_prometheus_exporter.parsers import manager
+from ironic_prometheus_exporter.parsers import ipmi
 from oslo_config import cfg
 from oslo_messaging.notify import notifier
+from prometheus_client import write_to_textfile, CollectorRegistry
 
 LOG = logging.getLogger(__name__)
 
@@ -23,23 +24,22 @@ class PrometheusFileDriver(notifier.Driver):
 
     def __init__(self, conf, topics, transport):
         self.location = conf.oslo_messaging_notifications.location
-        self.temporary_location = '/tmp/temporary_data'
         if not os.path.exists(self.location):
             os.makedirs(self.location)
-        if not os.path.exists(self.temporary_location):
-            os.makedirs(self.temporary_location)
         super(PrometheusFileDriver, self).__init__(conf, topics, transport)
 
     def notify(self, ctxt, message, priority, retry):
         try:
-            node_parser_manager = manager.ParserManager(message)
-            node_metrics = node_parser_manager.merge_information()
-            node_name = message['payload']['node_name']
-            tmpFile = os.path.join(self.temporary_location, node_name)
-            nodeFile = os.path.join(self.location, node_name)
-            with open(tmpFile, 'w') as file:
-                file.write(node_metrics)
-            os.rename(tmpFile, nodeFile)
+            if message['event_type'] == 'hardware.ipmi.metrics':
+                registry = CollectorRegistry()
+                node_name = message['payload']['node_name']
+                node_payload = message['payload']['payload']
+                for category in node_payload:
+                    ipmi.category_registry(category.lower(),
+                                           node_payload[category], node_name,
+                                           registry)
+                nodeFile = os.path.join(self.location, node_name)
+                write_to_textfile(nodeFile, registry)
         except Exception as e:
             LOG.error(e)
 
