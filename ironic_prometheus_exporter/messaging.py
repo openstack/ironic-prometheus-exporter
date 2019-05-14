@@ -1,12 +1,17 @@
+import logging
 import os
-import json
 
+from ironic_prometheus_exporter.parsers import ipmi
 from oslo_config import cfg
 from oslo_messaging.notify import notifier
+from prometheus_client import write_to_textfile, CollectorRegistry
+
+LOG = logging.getLogger(__name__)
+
 
 prometheus_opts = [
-    cfg.StrOpt('file_path', required=True,
-               help='Path for the json file where the metrics will be stored.')
+    cfg.StrOpt('location', required=True,
+               help='Directory where the files will be written.')
 ]
 
 
@@ -18,13 +23,35 @@ class PrometheusFileDriver(notifier.Driver):
     """Publish notifications into a File to be used by Prometheus"""
 
     def __init__(self, conf, topics, transport):
-        self.file_path = conf.oslo_messaging_notifications.file_path
-        if not self.file_path.endswith('.json'):
-            raise Exception('The file should end with .json')
-        if not os.path.exists(os.path.dirname(self.file_path)):
-            os.makedirs(os.path.dirname(self.file_path))
+        self.location = conf.oslo_messaging_notifications.location
+        if not os.path.exists(self.location):
+            os.makedirs(self.location)
         super(PrometheusFileDriver, self).__init__(conf, topics, transport)
 
     def notify(self, ctxt, message, priority, retry):
-        with open(self.file_path, 'w') as prometheus_file:
-            json.dump(message, prometheus_file)
+        try:
+            if message['event_type'] == 'hardware.ipmi.metrics':
+                registry = CollectorRegistry()
+                node_name = message['payload']['node_name']
+                node_payload = message['payload']['payload']
+                for category in node_payload:
+                    ipmi.category_registry(category.lower(),
+                                           node_payload[category], node_name,
+                                           registry)
+                nodeFile = os.path.join(self.location, node_name)
+                write_to_textfile(nodeFile, registry)
+        except Exception as e:
+            LOG.error(e)
+
+
+class SimpleFileDriver(notifier.Driver):
+
+    def __init__(self, conf, topics, transport):
+        self.location = conf.oslo_messaging_notifications.location
+        if not os.path.exists(self.location):
+            os.makedirs(os.path.dirname(self.location))
+        super(SimpleFileDriver, self).__init__(conf, topics, transport)
+
+    def notify(self, ctx, message, priority, retry):
+        with open(os.path.join(self.location, 'simplefile'), 'w') as file:
+            file.write(message)
