@@ -19,7 +19,7 @@ def parse_requirements(file_name):
 
 
 setup(
-    name='ironic.prometheus.exporter',
+    name='ironic_prometheus_exporter',
     version='1.0.0',
     description='Prometheus Exporter for Ironic Hardware Sensor data',
     url='',
