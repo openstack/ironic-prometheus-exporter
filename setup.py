@@ -1,49 +1,29 @@
-import re
+# Copyright (c) 2013 Hewlett-Packard Development Company, L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-from setuptools import setup, find_packages
+# THIS FILE IS MANAGED BY THE GLOBAL REQUIREMENTS REPO - DO NOT EDIT
+import setuptools
 
+# In python < 2.7.4, a lazy loading of package `pbr` will break
+# setuptools if some other modules registered functions in `atexit`.
+# solution from: http://bugs.python.org/issue15881#msg170215
+try:
+    import multiprocessing  # noqa
+except ImportError:
+    pass
 
-def parse_requirements(file_name):
-    requirements = []
-    for line in open(file_name, 'r').read().split('\n'):
-        if re.match(r'(\s*#)|(\s*$)', line):
-            continue
-        if re.match(r'\s*-e\s+', line):
-            requirements.append(re.sub(r'\s*-e\s+.*#egg=(.*)$', r'\1', line))
-        elif re.match(r'\s*-f\s+', line):
-            pass
-        else:
-            requirements.append(line)
-
-    return requirements
-
-
-setup(
-    name='ironic_prometheus_exporter',
-    version='1.0.0',
-    description='Prometheus Exporter for Ironic Hardware Sensor data',
-    url='',
-    author='Iury Gregory Melo Ferreira',
-    author_email='imelofer@redhat.com',
-    license='Apache 2.0',
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Information Technology',
-        'License :: OSI Approved :: Apache Software License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-    ],
-    packages=find_packages(),
-    install_requires=parse_requirements('requirements.txt'),
-    entry_points={
-        'oslo.messaging.notify.drivers': [
-            'prometheus_exporter=\
-             ironic_prometheus_exporter.messaging:PrometheusFileDriver',
-            'file_exporter=\
-             ironic_prometheus_exporter.messaging:SimpleFileDriver',
-        ],
-    },
-)
+setuptools.setup(
+    setup_requires=['pbr>=2.0.0'],
+    pbr=True)
