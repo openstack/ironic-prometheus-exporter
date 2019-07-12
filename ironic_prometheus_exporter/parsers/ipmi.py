@@ -13,6 +13,46 @@ from prometheus_client import Gauge
 LOG = logging.getLogger(__name__)
 
 
+CATEGORY_PARAMS = {
+    'management': {'prefix': 'baremetal_',
+                   'sufix': '',
+                   'extra_params': {},
+                   'use_ipmi_format': True},
+    'temperature': {'prefix': 'baremetal_',
+                    'sufix': '_celsius',
+                    'extra_params': {},
+                    'use_ipmi_format': False},
+    'system': {'prefix': 'baremetal_system_',
+               'sufix': '',
+               'extra_params': {},
+               'use_ipmi_format': True},
+    'current': {'prefix': 'baremetal_',
+                'sufix': '',
+                'extra_params': {},
+                'use_ipmi_format': False},
+    'version': {'prefix': 'baremetal_',
+                'sufix': '',
+                'extra_params': {},
+                'use_ipmi_format': True},
+    'memory': {'prefix': 'baremetal_',
+               'sufix': '',
+               'extra_params': {'special_label': 'memory'},
+               'use_ipmi_format': True},
+    'power': {'prefix': 'baremetal_power_',
+              'sufix': '',
+              'extra_params': {},
+              'use_ipmi_format': True},
+    'watchdog2': {'prefix': 'baremetal_',
+                  'sufix': '',
+                  'extra_params': {},
+                  'use_ipmi_format': True},
+    'fan': {'prefix': 'baremetal_',
+            'sufix': '',
+            'extra_params': {'extract_unit': True, 'special_label': 'fan'},
+            'use_ipmi_format': True},
+}
+
+
 def metric_names(payload, prefix, sufix, **kwargs):
     LOG.info('metric_names function called with payload=%s' % str(payload))
     LOG.info('prefix=%s | sufix=%s | kwargs=%s' %
@@ -23,23 +63,32 @@ def metric_names(payload, prefix, sufix, **kwargs):
     special_label = kwargs.get('special_label')
     for entry in payload:
         if special_label == 'fan':
-            e = re.sub(r'[\d].*$', '', entry.lower())
-            e = re.sub(r'[\(\)]', '', e).split()
+            # NOTE (iurygregory): regex to remove a sequence of numbers and
+            # letters that comes after the fan sensor name.
+            # e.g: 'Fan4B (0x43)' will be 'fan (0x43)'
+            #      'Fan Redundancy (0x78)' will be 'fan redundancy (0x78)'
+            e = re.sub(r'fan\d*[a-z]*', 'fan', entry.lower())
+            # NOTE (iurygregory): regex to remove brackets and their content
+            # e.g: 'fan (0x43)' will turn into ['fan']
+            #      'fan redundancy (0x78)' will turn into ['fan', 'redundancy']
+            e = re.sub(r'\(.*\)', '', e).split()
             label = '_'.join(e)
         else:
+            # NOTE (iurygregory): regex to remove all numbers
             e = re.sub(r"[\d]+", "", entry).lower().split()
             label = '_'.join(e[:-1]).replace('-', '_')
 
+        unit = ''
         if extract_unit:
             sensor_read = payload[entry]['Sensor Reading'].split()
             if len(sensor_read) > 1:
-                sufix = '_' + sensor_read[-1].lower()
+                unit = '_' + sensor_read[-1].lower()
 
         if special_label == 'memory':
             if 'mem' not in label and 'memory' not in label:
                 label = 'memory_' + label
 
-        metric_name = re.sub(r'[\W]', '_', prefix + label + sufix)
+        metric_name = re.sub(r'[\W]', '_', prefix + label + sufix + unit)
         if metric_name[0].isdigit():
             metric_name = metric_name.lstrip('0123456789')
         if metric_name in metric_dic:
@@ -49,7 +98,7 @@ def metric_names(payload, prefix, sufix, **kwargs):
     return metric_dic
 
 
-def extract_labels(entries, payload, node_name):
+def extract_labels(entries, payload, node_name, node_uuid, instance_uuid):
     """ This function extract the labels to be used by a metric
 
     If a metric has many entries we add the 'Sensor ID' information as label
@@ -71,17 +120,28 @@ def extract_labels(entries, payload, node_name):
     LOG.info('extract_labels function called with: entries=%s | payload=%s | \
              node_name=%s' % (str(entries), str(payload), node_name))
     if len(entries) == 1:
+        status = payload[entries[0]].get('Status')
         labels = {'node_name': node_name,
-                  'entity_id': payload[entries[0]]['Entity ID']}
+                  'node_uuid': node_uuid,
+                  'instance_uuid': instance_uuid,
+                  'entity_id': payload[entries[0]]['Entity ID'],
+                  'sensor_id': payload[entries[0]]['Sensor ID']}
+        if status:
+            labels['status'] = status
         return {entries[0]: labels}
     entries_labels = {}
     for entry in entries:
         try:
             entity_id = payload[entry]['Entity ID']
             sensor_id = payload[entry]['Sensor ID']
+            status = payload[entry].get('Status')
             metric_label = {'node_name': node_name,
+                            'node_uuid': node_uuid,
+                            'instance_uuid': instance_uuid,
                             'entity_id': entity_id,
                             'sensor_id': sensor_id}
+            if status:
+                metric_label['status'] = status
             entries_labels[entry] = metric_label
         except Exception as e:
             LOG.exception(e)
@@ -114,11 +174,13 @@ def extract_values(entries, payload, use_ipmi_format=True):
     return values
 
 
-def prometheus_format(payload, node_name, ipmi_metric_registry,
-                      available_metrics, use_ipmi_format):
+def prometheus_format(payload, node_name, node_uuid, instance_uuid,
+                      ipmi_metric_registry, available_metrics,
+                      use_ipmi_format):
     for metric in available_metrics:
         entries = available_metrics[metric]
-        labels = extract_labels(entries, payload, node_name)
+        labels = extract_labels(entries, payload, node_name, node_uuid,
+                                instance_uuid)
         values = extract_values(entries, payload,
                                 use_ipmi_format=use_ipmi_format)
         if all(v is None for v in values.values()):
@@ -131,36 +193,14 @@ def prometheus_format(payload, node_name, ipmi_metric_registry,
             g.labels(**labels[e]).set(values[e])
 
 
-CATEGORY_PARAMS = {
-    'management': {'prefix': 'baremetal_', 'sufix': '',
-                   'extra_params': {}, 'use_ipmi_format': True},
-    'temperature': {'prefix': 'baremetal_', 'sufix': '_celsius',
-                    'extra_params': {}, 'use_ipmi_format': False},
-    'system': {'prefix': 'baremetal_system_', 'sufix': '', 'extra_params': {},
-               'use_ipmi_format': True},
-    'current': {'prefix': 'baremetal_', 'sufix': '', 'extra_params': {},
-                'use_ipmi_format': False},
-    'version': {'prefix': 'baremetal_', 'sufix': '', 'extra_params': {},
-                'use_ipmi_format': True},
-    'memory': {'prefix': 'baremetal_', 'sufix': '',
-               'extra_params': {'special_label': 'memory'},
-               'use_ipmi_format': True},
-    'power': {'prefix': 'baremetal_power_', 'sufix': '', 'extra_params': {},
-              'use_ipmi_format': True},
-    'watchdog2': {'prefix': 'baremetal_', 'sufix': '', 'extra_params': {},
-                  'use_ipmi_format': True},
-    'fan': {'prefix': 'baremetal_', 'sufix': '',
-            'extra_params': {'extract_unit': True, 'special_label': 'fan'},
-            'use_ipmi_format': True}
-}
-
-
-def category_registry(category_name, payload, node_name, ipmi_metric_registry):
+def category_registry(category_name, payload, node_name, node_uuid,
+                      instance_uuid, ipmi_metric_registry):
     if category_name in CATEGORY_PARAMS:
         prefix = CATEGORY_PARAMS[category_name]['prefix']
         sufix = CATEGORY_PARAMS[category_name]['sufix']
         extra = CATEGORY_PARAMS[category_name]['extra_params']
         available_metrics = metric_names(payload, prefix, sufix, **extra)
         use_ipmi_format = CATEGORY_PARAMS[category_name]['use_ipmi_format']
-        prometheus_format(payload, node_name, ipmi_metric_registry,
-                          available_metrics, use_ipmi_format)
+        prometheus_format(payload, node_name, node_uuid, instance_uuid,
+                          ipmi_metric_registry, available_metrics,
+                          use_ipmi_format)

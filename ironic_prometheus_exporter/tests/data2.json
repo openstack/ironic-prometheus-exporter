@@ -1,15 +1,15 @@
 {
     "priority": "INFO",
     "event_type": "hardware.ipmi.metrics",
-    "timestamp": "2019-03-29 20:12:26.885347",
+    "timestamp": "2019-03-29 20:15:26.885347",
     "publisher_id": "None.localhost.localdomain",
     "payload": {
-        "instance_uuid": "ac2aa2fd-6e1a-41c8-a114-2084c8705228",
-        "node_uuid": "ac2aa2fd-6e1a-41c8-a114-2084c8705228",
+        "instance_uuid": "6d85703a-565d-469a-96ce-30b6de53079d",
+        "node_uuid": "6d85703a-565d-469a-96ce-30b6de53079d",
         "event_type": "hardware.ipmi.metrics.update",
-        "timestamp": "2019-03-29T20:22:22.989020",
+        "timestamp": "2019-03-29T20:15:22.989020",
         "node_name": "knilab-master-u8",
-        "message_id": "85d6b2c8-fe57-432d-868a-330e0e28cf34",
+        "message_id": "d2b30520-907d-46c8-bfee-c5586e6fb3a1",
         "payload": {
             "Management": {
                 "Front LED Panel (0x23)": {
