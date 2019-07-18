@@ -51,6 +51,11 @@ CATEGORY_PARAMS = {
             'sufix': '',
             'extra_params': {'extract_unit': True, 'special_label': 'fan'},
             'use_ipmi_format': True},
+    'voltage': {'prefix': 'baremetal_voltage_',
+                'sufix': '',
+                'extra_params': {'extract_unit': True,
+                                 'special_label': 'voltage'},
+                'use_ipmi_format': True}
 }
 
 
@@ -74,13 +79,24 @@ def metric_names(payload, prefix, sufix, **kwargs):
             #      'fan redundancy (0x78)' will turn into ['fan', 'redundancy']
             e = re.sub(r'\(.*\)', '', e).split()
             label = '_'.join(e)
+        elif special_label == 'voltage':
+            # NOTE (iurygregory): regex to remove Voltage value from sensor_id
+            # e.g: '3.3V B PG (0x15)' will be 'b pg (0x15)'
+            #      '5V SW PG (0x10)' will be 'sw pg (0x10)'
+            e = re.sub(r'([\d+]v)|([\d+].[\d*]v)', '', entry.lower())
+            # NOTE (iurygregory): regex to remove all numbers
+            # e.g: 'Voltage 1 (0x6d)' will turn into ['voltage', '(xd)']
+            e = re.sub(r'[\d]+', '', e).lower().split()
+            label = '_'.join(e[:-1]).replace('-', '_')
+            if label in prefix:
+                label = ''
         else:
             # NOTE (iurygregory): regex to remove all numbers
-            e = re.sub(r"[\d]+", "", entry).lower().split()
+            e = re.sub(r'[\d]+', '', entry).lower().split()
             label = '_'.join(e[:-1]).replace('-', '_')
 
         unit = ''
-        if extract_unit:
+        if extract_unit and payload[entry]['Sensor Reading'] != 'No Reading':
             sensor_read = payload[entry]['Sensor Reading'].split()
             if len(sensor_read) > 1:
                 unit = '_' + sensor_read[-1].lower()
@@ -90,6 +106,7 @@ def metric_names(payload, prefix, sufix, **kwargs):
                 label = 'memory_' + label
 
         metric_name = re.sub(r'[\W]', '_', prefix + label + sufix + unit)
+        metric_name = re.sub(r'[_]+', '_', metric_name)
         if metric_name[0].isdigit():
             metric_name = metric_name.lstrip('0123456789')
         if metric_name in metric_dic:
