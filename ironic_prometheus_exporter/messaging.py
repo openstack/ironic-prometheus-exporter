@@ -35,7 +35,10 @@ class PrometheusFileDriver(notifier.Driver):
                 node_name = message['payload']['node_name']
                 node_uuid = message['payload']['node_uuid']
                 instance_uuid = message['payload']['instance_uuid']
+                timestamp = message['payload']['timestamp']
                 node_payload = message['payload']['payload']
+                ipmi.timestamp_registry(timestamp, node_name, node_uuid,
+                                        instance_uuid, registry)
                 for category in node_payload:
                     ipmi.category_registry(category.lower(),
                                            node_payload[category], node_name,
