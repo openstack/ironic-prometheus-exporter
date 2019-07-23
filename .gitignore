@@ -128,3 +128,6 @@ dmypy.json
 .stestr/
 AUTHORS
 ChangeLog
+
+# release notes build
+releasenotes/build
