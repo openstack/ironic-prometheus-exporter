@@ -35,8 +35,10 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
         msg1 = json.load(open('./ironic_prometheus_exporter/tests/data.json'))
         node1 = msg1['payload']['node_name']
         msg2 = json.load(open('./ironic_prometheus_exporter/tests/data2.json'))
-        # Override data2 node_name
+        # Override data2 node_name, node_uuid, instance_uuid
         msg2['payload']['node_name'] = node1
+        msg2['payload']['node_uuid'] = msg1['payload']['node_uuid']
+        msg2['payload']['instance_uuid'] = msg1['payload']['instance_uuid']
         node2 = msg2['payload']['node_name']
         self.assertNotEqual(msg1['payload']['timestamp'],
                             msg2['payload']['timestamp'])
