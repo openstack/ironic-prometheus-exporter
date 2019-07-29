@@ -550,3 +550,367 @@ class TestPayloadsParser(unittest.TestCase):
              'node_uuid': self.node_uuid,
              'instance_uuid': self.instance_uuid}
         ))
+
+    def test_voltage_manager(self):
+        prefix = ipmi.CATEGORY_PARAMS['voltage']['prefix']
+        sufix = ipmi.CATEGORY_PARAMS['voltage']['sufix']
+        extra = ipmi.CATEGORY_PARAMS['voltage']['extra_params']
+        ipmi_format = ipmi.CATEGORY_PARAMS['voltage']['use_ipmi_format']
+
+        voltage_metrics_name = ipmi.metric_names(self.payload['Voltage'],
+                                                 prefix, sufix, **extra)
+
+        self.assertEqual(len(voltage_metrics_name), 19)
+        expected_metrics = [
+            'baremetal_voltage_mem_vtt_pg',
+            'baremetal_voltage_sw_pg',
+            'baremetal_voltage_vsa_pg',
+            'baremetal_voltage_vcore_pg',
+            'baremetal_voltage_volts',
+            'baremetal_voltage_dimm_pg',
+            'baremetal_voltage_vsbm_sw_pg',
+            'baremetal_voltage_ndc_pg',
+            'baremetal_voltage_ps_pg_fail',
+            'baremetal_voltage_vccio_pg',
+            'baremetal_voltage_vsb_sw_pg',
+            'baremetal_voltage_mem_vddq_pg',
+            'baremetal_voltage_bp_pg',
+            'baremetal_voltage_a_pg',
+            'baremetal_voltage_fivr_pg',
+            'baremetal_voltage_pvnn_sw_pg',
+            'baremetal_voltage_mem_vpp_pg',
+            'baremetal_voltage_pfault_fail_safe',
+            'baremetal_voltage_b_pg'
+        ]
+        for metric in expected_metrics:
+            self.assertIn(metric, voltage_metrics_name)
+
+        ipmi.prometheus_format(self.payload['Voltage'], self.node_name,
+                               self.node_uuid, self.instance_uuid,
+                               self.metric_registry, voltage_metrics_name,
+                               ipmi_format)
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vddq_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.1 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM012 VDDQ PG (0x24)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vddq_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.1 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM345 VDDQ PG (0x27)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vddq_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.2 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM012 VDDQ PG (0x2e)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vddq_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.2 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM345 VDDQ PG (0x31)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_vccio_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.1 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'VCCIO PG (0x2a)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_vccio_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.2 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'VCCIO PG (0x34)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_pvnn_sw_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'PVNN SW PG (0x11)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_sw_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': '1.8V SW PG (0xe)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_sw_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': '2.5V SW PG (0xf)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_sw_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': '5V SW PG (0x10)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_a_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': '3.3V A PG (0x14)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_bp_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'BP2 PG (0xd)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_bp_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'BP1 PG (0xc)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_bp_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'BP0 PG (0xb)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_ps_pg_fail',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'PS1 PG FAIL (0x9)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_ps_pg_fail',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'PS2 PG FAIL (0xa)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_fivr_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.1 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'FIVR PG (0x2c)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_fivr_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.2 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'FIVR PG (0x36)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_vsa_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.1 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'VSA PG (0x2d)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_vsa_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.2 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'VSA PG (0x37)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vtt_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.1 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM012 VTT PG (0x26)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vtt_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.1 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM345 VTT PG (0x29)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vtt_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.2 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM012 VTT PG (0x30)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vtt_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.2 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM345 VTT PG (0x33)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_vsbm_sw_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'VSBM SW PG (0x13)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_b_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': '3.3V B PG (0x15)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_vsb_sw_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'VSB11 SW PG (0x12)'}
+        ))
+
+        self.assertEqual(208.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_volts',
+            {'node_name': self.node_name,
+             'entity_id': '10.2 (Power Supply)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'Voltage 2 (0x6e)',
+             'status': 'ok'}
+        ))
+        self.assertEqual(208.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_volts',
+            {'node_name': self.node_name,
+             'entity_id': '10.1 (Power Supply)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'Voltage 1 (0x6d)',
+             'status': 'ok'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_ndc_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'NDC PG (0x8)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_vcore_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.2 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'VCORE PG (0x35)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_vcore_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.1 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'VCORE PG (0x2b)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vpp_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.2 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM345 VPP PG (0x32)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vpp_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.1 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM012 VPP PG (0x25)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vpp_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.2 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM012 VPP PG (0x2f)'}
+        ))
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_mem_vpp_pg',
+            {'node_name': self.node_name,
+             'entity_id': '3.1 (Processor)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'MEM345 VPP PG (0x28)'}
+        ))
+
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_voltage_dimm_pg',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'DIMM PG (0x7)'}
+        ))
+
+        self.assertEqual(None, self.metric_registry.get_sample_value(
+            'baremetal_voltage_pfault_fail_safe',
+            {'node_name': self.node_name,
+             'entity_id': '7.1 (System Board)',
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'sensor_id': 'Pfault Fail Safe (0x74)'}
+        ))
