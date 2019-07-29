@@ -539,3 +539,14 @@ class TestPayloadsParser(unittest.TestCase):
              'instance_uuid': self.instance_uuid,
              'entity_id': '7.1 (System Board)',
              'status': 'ok'}))
+
+    def test_timestamp_metric(self):
+        ipmi.timestamp_registry(self.timestamp, self.node_name, self.node_uuid,
+                                self.instance_uuid, self.metric_registry)
+
+        self.assertEqual(1553890342.0, self.metric_registry.get_sample_value(
+            'baremetal_last_payload_timestamp_seconds',
+            {'node_name': self.node_name,
+             'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid}
+        ))

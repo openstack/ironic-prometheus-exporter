@@ -1,6 +1,7 @@
 import logging
 import re
 
+from datetime import datetime
 from prometheus_client import Gauge
 
 # NOTE (iurygregory): most of the sensor readings come in the ipmi format
@@ -204,3 +205,17 @@ def category_registry(category_name, payload, node_name, node_uuid,
         prometheus_format(payload, node_name, node_uuid, instance_uuid,
                           ipmi_metric_registry, available_metrics,
                           use_ipmi_format)
+
+
+def timestamp_registry(timestamp, node_name, node_uuid, instance_uuid,
+                       ipmi_metric_registry):
+    metric = 'baremetal_last_payload_timestamp_seconds'
+    labels = {'node_name': node_name,
+              'node_uuid': node_uuid,
+              'instance_uuid': instance_uuid}
+    dt_1970 = datetime(1970, 1, 1, 0, 0, 0)
+    dt_timestamp = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%f')
+    value = int((dt_timestamp - dt_1970).total_seconds())
+    g = Gauge(metric, 'Timestamp of the last received payload',
+              labelnames=labels.keys(), registry=ipmi_metric_registry)
+    g.labels(**labels).set(value)
