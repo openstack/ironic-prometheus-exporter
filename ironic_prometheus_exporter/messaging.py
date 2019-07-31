@@ -32,18 +32,11 @@ class PrometheusFileDriver(notifier.Driver):
         try:
             if message['event_type'] == 'hardware.ipmi.metrics':
                 registry = CollectorRegistry()
-                node_name = message['payload']['node_name']
-                node_uuid = message['payload']['node_uuid']
-                instance_uuid = message['payload']['instance_uuid']
-                timestamp = message['payload']['timestamp']
-                node_payload = message['payload']['payload']
-                ipmi.timestamp_registry(timestamp, node_name, node_uuid,
-                                        instance_uuid, registry)
-                for category in node_payload:
-                    ipmi.category_registry(category.lower(),
-                                           node_payload[category], node_name,
-                                           node_uuid, instance_uuid, registry)
-                nodeFile = os.path.join(self.location, node_name)
+                node_message = message['payload']
+                ipmi.timestamp_registry(node_message, registry)
+                ipmi.category_registry(node_message, registry)
+                nodeFile = os.path.join(self.location,
+                                        node_message['node_name'])
                 write_to_textfile(nodeFile, registry)
         except Exception as e:
             LOG.error(e)

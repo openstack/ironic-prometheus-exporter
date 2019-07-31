@@ -11,6 +11,7 @@ DATA = json.load(open('./ironic_prometheus_exporter/tests/data.json'))
 class TestPayloadsParser(unittest.TestCase):
 
     def setUp(self):
+        self.node_message = DATA['payload']
         self.node_name = DATA['payload']['node_name']
         self.node_uuid = DATA['payload']['node_uuid']
         self.instance_uuid = DATA['payload']['instance_uuid']
@@ -19,21 +20,20 @@ class TestPayloadsParser(unittest.TestCase):
         self.metric_registry = CollectorRegistry()
 
     def test_management_parser(self):
-        prefix = ipmi.CATEGORY_PARAMS['management']['prefix']
-        sufix = ipmi.CATEGORY_PARAMS['management']['sufix']
-        extra = ipmi.CATEGORY_PARAMS['management']['extra_params']
-        ipmi_format = ipmi.CATEGORY_PARAMS['management']['use_ipmi_format']
+        management_category_info = ipmi.CATEGORY_PARAMS['management'].copy()
+        management_category_info['data'] = \
+            self.node_message['payload']['Management'].copy()
+        management_category_info['node_name'] = self.node_name
+        management_category_info['node_uuid'] = self.node_uuid
+        management_category_info['instance_uuid'] = self.instance_uuid
 
-        management_metrics_name = ipmi.metric_names(self.payload['Management'],
-                                                    prefix, sufix, **extra)
+        management_metrics_name = ipmi.metric_names(management_category_info)
         self.assertEqual(len(management_metrics_name), 1)
         self.assertIn('baremetal_front_led_panel', management_metrics_name)
 
-        ipmi.prometheus_format(self.payload['Management'], self.node_name,
-                               self.node_uuid, self.instance_uuid,
+        ipmi.prometheus_format(management_category_info,
                                self.metric_registry,
-                               management_metrics_name, ipmi_format)
-
+                               management_metrics_name)
         self.assertEqual(0.0, self.metric_registry.get_sample_value(
             'baremetal_front_led_panel',
             {'node_name': 'knilab-master-u9',
@@ -43,22 +43,23 @@ class TestPayloadsParser(unittest.TestCase):
              'sensor_id': 'Front LED Panel (0x23)'}))
 
     def test_temperature_parser(self):
-        prefix = ipmi.CATEGORY_PARAMS['temperature']['prefix']
-        sufix = ipmi.CATEGORY_PARAMS['temperature']['sufix']
-        extra = ipmi.CATEGORY_PARAMS['temperature']['extra_params']
-        ipmi_format = ipmi.CATEGORY_PARAMS['temperature']['use_ipmi_format']
-        temperature_metrics_name = ipmi.metric_names(
-            self.payload['Temperature'], prefix, sufix, **extra)
+        temperature_category_info = ipmi.CATEGORY_PARAMS['temperature'].copy()
+        temperature_category_info['data'] = \
+            self.node_message['payload']['Temperature'].copy()
+        temperature_category_info['node_name'] = self.node_name
+        temperature_category_info['node_uuid'] = self.node_uuid
+        temperature_category_info['instance_uuid'] = self.instance_uuid
+
+        temperature_metrics_name = ipmi.metric_names(temperature_category_info)
         self.assertEqual(len(temperature_metrics_name), 3)
         self.assertIn('baremetal_temp_celsius', temperature_metrics_name)
         self.assertIn('baremetal_exhaust_temp_celsius',
                       temperature_metrics_name)
         self.assertIn('baremetal_inlet_temp_celsius', temperature_metrics_name)
 
-        ipmi.prometheus_format(self.payload['Temperature'], self.node_name,
-                               self.node_uuid, self.instance_uuid,
+        ipmi.prometheus_format(temperature_category_info,
                                self.metric_registry,
-                               temperature_metrics_name, ipmi_format)
+                               temperature_metrics_name)
         self.assertEqual(21.0, self.metric_registry.get_sample_value(
             'baremetal_inlet_temp_celsius',
             {'node_name': self.node_name,
@@ -92,20 +93,21 @@ class TestPayloadsParser(unittest.TestCase):
                                        'status': 'ok'}))
 
     def test_system_parser(self):
-        prefix = ipmi.CATEGORY_PARAMS['system']['prefix']
-        sufix = ipmi.CATEGORY_PARAMS['system']['sufix']
-        extra = ipmi.CATEGORY_PARAMS['system']['extra_params']
-        ipmi_format = ipmi.CATEGORY_PARAMS['system']['use_ipmi_format']
-        system_metrics_name = ipmi.metric_names(self.payload['System'],
-                                                prefix, sufix, **extra)
+        system_category_info = ipmi.CATEGORY_PARAMS['system'].copy()
+        system_category_info['data'] = \
+            self.node_message['payload']['System'].copy()
+        system_category_info['node_name'] = self.node_name
+        system_category_info['node_uuid'] = self.node_uuid
+        system_category_info['instance_uuid'] = self.instance_uuid
+
+        system_metrics_name = ipmi.metric_names(system_category_info)
         self.assertEqual(len(system_metrics_name), 2)
         self.assertIn('baremetal_system_unknown', system_metrics_name)
         self.assertIn('baremetal_system_post_err', system_metrics_name)
 
-        ipmi.prometheus_format(self.payload['System'], self.node_name,
-                               self.node_uuid, self.instance_uuid,
+        ipmi.prometheus_format(system_category_info,
                                self.metric_registry,
-                               system_metrics_name, ipmi_format)
+                               system_metrics_name)
         self.assertEqual(0.0, self.metric_registry.get_sample_value(
             'baremetal_system_unknown',
             {'node_name': self.node_name,
@@ -124,20 +126,21 @@ class TestPayloadsParser(unittest.TestCase):
         ))
 
     def test_current_parser(self):
-        prefix = ipmi.CATEGORY_PARAMS['current']['prefix']
-        sufix = ipmi.CATEGORY_PARAMS['current']['sufix']
-        extra = ipmi.CATEGORY_PARAMS['current']['extra_params']
-        ipmi_format = ipmi.CATEGORY_PARAMS['current']['use_ipmi_format']
-        current_metrics_name = ipmi.metric_names(self.payload['Current'],
-                                                 prefix, sufix, **extra)
+        current_category_info = ipmi.CATEGORY_PARAMS['current'].copy()
+        current_category_info['data'] = \
+            self.node_message['payload']['Current'].copy()
+        current_category_info['node_name'] = self.node_name
+        current_category_info['node_uuid'] = self.node_uuid
+        current_category_info['instance_uuid'] = self.instance_uuid
+
+        current_metrics_name = ipmi.metric_names(current_category_info)
         self.assertEqual(len(current_metrics_name), 2)
         self.assertIn('baremetal_current', current_metrics_name)
         self.assertIn('baremetal_pwr_consumption', current_metrics_name)
 
-        ipmi.prometheus_format(self.payload['Current'], self.node_name,
-                               self.node_uuid, self.instance_uuid,
+        ipmi.prometheus_format(current_category_info,
                                self.metric_registry,
-                               current_metrics_name, ipmi_format)
+                               current_metrics_name)
         self.assertEqual(264.0, self.metric_registry.get_sample_value(
             'baremetal_pwr_consumption',
             {'node_name': self.node_name,
@@ -167,22 +170,22 @@ class TestPayloadsParser(unittest.TestCase):
         ))
 
     def test_version_parser(self):
-        prefix = ipmi.CATEGORY_PARAMS['version']['prefix']
-        sufix = ipmi.CATEGORY_PARAMS['version']['sufix']
-        extra = ipmi.CATEGORY_PARAMS['version']['extra_params']
-        ipmi_format = ipmi.CATEGORY_PARAMS['version']['use_ipmi_format']
+        version_category_info = ipmi.CATEGORY_PARAMS['version'].copy()
+        version_category_info['data'] = \
+            self.node_message['payload']['Version'].copy()
+        version_category_info['node_name'] = self.node_name
+        version_category_info['node_uuid'] = self.node_uuid
+        version_category_info['instance_uuid'] = self.instance_uuid
 
-        version_metrics_name = ipmi.metric_names(self.payload['Version'],
-                                                 prefix, sufix, **extra)
+        version_metrics_name = ipmi.metric_names(version_category_info)
         self.assertEqual(len(version_metrics_name), 3)
         self.assertIn('baremetal_tpm_presence', version_metrics_name)
         self.assertIn('baremetal_hdwr_version_err', version_metrics_name)
         self.assertIn('baremetal_chassis_mismatch', version_metrics_name)
 
-        ipmi.prometheus_format(self.payload['Version'], self.node_name,
-                               self.node_uuid, self.instance_uuid,
+        ipmi.prometheus_format(version_category_info,
                                self.metric_registry,
-                               version_metrics_name, ipmi_format)
+                               version_metrics_name)
         self.assertEqual(1.0, self.metric_registry.get_sample_value(
             'baremetal_tpm_presence',
             {'node_name': self.node_name,
@@ -209,13 +212,14 @@ class TestPayloadsParser(unittest.TestCase):
         ))
 
     def test_memory_parser(self):
-        prefix = ipmi.CATEGORY_PARAMS['memory']['prefix']
-        sufix = ipmi.CATEGORY_PARAMS['memory']['sufix']
-        extra = ipmi.CATEGORY_PARAMS['memory']['extra_params']
-        ipmi_format = ipmi.CATEGORY_PARAMS['memory']['use_ipmi_format']
-        memory_metrics_name = ipmi.metric_names(self.payload['Memory'], prefix,
-                                                sufix, **extra)
+        memory_category_info = ipmi.CATEGORY_PARAMS['memory'].copy()
+        memory_category_info['data'] = \
+            self.node_message['payload']['Memory'].copy()
+        memory_category_info['node_name'] = self.node_name
+        memory_category_info['node_uuid'] = self.node_uuid
+        memory_category_info['instance_uuid'] = self.instance_uuid
 
+        memory_metrics_name = ipmi.metric_names(memory_category_info)
         self.assertEqual(len(memory_metrics_name), 10)
         self.assertIn('baremetal_memory_ecc_corr_err', memory_metrics_name)
         self.assertIn('baremetal_idpt_mem_fail', memory_metrics_name)
@@ -231,11 +235,9 @@ class TestPayloadsParser(unittest.TestCase):
                       memory_metrics_name)
         self.assertIn('baremetal_memory_spared', memory_metrics_name)
 
-        ipmi.prometheus_format(self.payload['Memory'], self.node_name,
-                               self.node_uuid, self.instance_uuid,
+        ipmi.prometheus_format(memory_category_info,
                                self.metric_registry,
-                               memory_metrics_name, ipmi_format)
-
+                               memory_metrics_name)
         self.assertEqual(None, self.metric_registry.get_sample_value(
             'baremetal_mem_ecc_warning',
             {'node_name': self.node_name,
@@ -318,21 +320,21 @@ class TestPayloadsParser(unittest.TestCase):
         ))
 
     def test_power_parser(self):
-        prefix = ipmi.CATEGORY_PARAMS['power']['prefix']
-        sufix = ipmi.CATEGORY_PARAMS['power']['sufix']
-        extra = ipmi.CATEGORY_PARAMS['power']['extra_params']
-        ipmi_format = ipmi.CATEGORY_PARAMS['power']['use_ipmi_format']
-        power_metrics_name = ipmi.metric_names(self.payload['Power'], prefix,
-                                               sufix, **extra)
+        power_category_info = ipmi.CATEGORY_PARAMS['power'].copy()
+        power_category_info['data'] = \
+            self.node_message['payload']['Power'].copy()
+        power_category_info['node_name'] = self.node_name
+        power_category_info['node_uuid'] = self.node_uuid
+        power_category_info['instance_uuid'] = self.instance_uuid
+
+        power_metrics_name = ipmi.metric_names(power_category_info)
         self.assertEqual(len(power_metrics_name), 2)
         self.assertIn('baremetal_power_ps_redundancy', power_metrics_name)
         self.assertIn('baremetal_power_status', power_metrics_name)
 
-        ipmi.prometheus_format(self.payload['Power'], self.node_name,
-                               self.node_uuid, self.instance_uuid,
+        ipmi.prometheus_format(power_category_info,
                                self.metric_registry,
-                               power_metrics_name, ipmi_format)
-
+                               power_metrics_name)
         self.assertEqual(None, self.metric_registry.get_sample_value(
             'baremetal_power_ps_redundancy',
             {'node_name': self.node_name,
@@ -355,21 +357,21 @@ class TestPayloadsParser(unittest.TestCase):
                                        'entity_id': '10.1 (Power Supply)'}))
 
     def test_watchdog2_parser(self):
-        prefix = ipmi.CATEGORY_PARAMS['watchdog2']['prefix']
-        sufix = ipmi.CATEGORY_PARAMS['watchdog2']['sufix']
-        extra = ipmi.CATEGORY_PARAMS['watchdog2']['extra_params']
-        ipmi_format = ipmi.CATEGORY_PARAMS['watchdog2']['use_ipmi_format']
-        watchdog2_metrics_name = ipmi.metric_names(self.payload['Watchdog2'],
-                                                   prefix, sufix, **extra)
+        watchdog2_category_info = ipmi.CATEGORY_PARAMS['watchdog2'].copy()
+        watchdog2_category_info['data'] = \
+            self.node_message['payload']['Watchdog2'].copy()
+        watchdog2_category_info['node_name'] = self.node_name
+        watchdog2_category_info['node_uuid'] = self.node_uuid
+        watchdog2_category_info['instance_uuid'] = self.instance_uuid
+
+        watchdog2_metrics_name = ipmi.metric_names(watchdog2_category_info)
         self.assertEqual(len(watchdog2_metrics_name), 2)
         self.assertIn('baremetal_os_watchdog_time', watchdog2_metrics_name)
         self.assertIn('baremetal_os_watchdog', watchdog2_metrics_name)
 
-        ipmi.prometheus_format(self.payload['Watchdog2'], self.node_name,
-                               self.node_uuid, self.instance_uuid,
+        ipmi.prometheus_format(watchdog2_category_info,
                                self.metric_registry,
-                               watchdog2_metrics_name, ipmi_format)
-
+                               watchdog2_metrics_name)
         self.assertEqual(0.0, self.metric_registry.get_sample_value(
             'baremetal_os_watchdog_time',
             {'node_name': self.node_name,
@@ -387,22 +389,21 @@ class TestPayloadsParser(unittest.TestCase):
         ))
 
     def test_fan_parser(self):
-        prefix = ipmi.CATEGORY_PARAMS['fan']['prefix']
-        sufix = ipmi.CATEGORY_PARAMS['fan']['sufix']
-        extra = ipmi.CATEGORY_PARAMS['fan']['extra_params']
-        ipmi_format = ipmi.CATEGORY_PARAMS['fan']['use_ipmi_format']
-        fan_metrics_name = ipmi.metric_names(self.payload['Fan'], prefix,
-                                             sufix, **extra)
+        fan_category_info = ipmi.CATEGORY_PARAMS['fan'].copy()
+        fan_category_info['data'] = \
+            self.node_message['payload']['Fan'].copy()
+        fan_category_info['node_name'] = self.node_name
+        fan_category_info['node_uuid'] = self.node_uuid
+        fan_category_info['instance_uuid'] = self.instance_uuid
 
+        fan_metrics_name = ipmi.metric_names(fan_category_info)
         self.assertEqual(len(fan_metrics_name), 2)
         self.assertIn('baremetal_fan_redundancy', fan_metrics_name)
         self.assertIn('baremetal_fan_rpm', fan_metrics_name)
 
-        ipmi.prometheus_format(self.payload['Fan'], self.node_name,
-                               self.node_uuid, self.instance_uuid,
+        ipmi.prometheus_format(fan_category_info,
                                self.metric_registry,
-                               fan_metrics_name, ipmi_format)
-
+                               fan_metrics_name)
         self.assertEqual(0.0, self.metric_registry.get_sample_value(
             'baremetal_fan_redundancy',
             {'node_name': self.node_name,
@@ -541,8 +542,7 @@ class TestPayloadsParser(unittest.TestCase):
              'status': 'ok'}))
 
     def test_timestamp_metric(self):
-        ipmi.timestamp_registry(self.timestamp, self.node_name, self.node_uuid,
-                                self.instance_uuid, self.metric_registry)
+        ipmi.timestamp_registry(self.node_message, self.metric_registry)
 
         self.assertEqual(1553890342.0, self.metric_registry.get_sample_value(
             'baremetal_last_payload_timestamp_seconds',
@@ -552,14 +552,14 @@ class TestPayloadsParser(unittest.TestCase):
         ))
 
     def test_voltage_manager(self):
-        prefix = ipmi.CATEGORY_PARAMS['voltage']['prefix']
-        sufix = ipmi.CATEGORY_PARAMS['voltage']['sufix']
-        extra = ipmi.CATEGORY_PARAMS['voltage']['extra_params']
-        ipmi_format = ipmi.CATEGORY_PARAMS['voltage']['use_ipmi_format']
+        voltage_category_info = ipmi.CATEGORY_PARAMS['voltage'].copy()
+        voltage_category_info['data'] = \
+            self.node_message['payload']['Voltage'].copy()
+        voltage_category_info['node_name'] = self.node_name
+        voltage_category_info['node_uuid'] = self.node_uuid
+        voltage_category_info['instance_uuid'] = self.instance_uuid
 
-        voltage_metrics_name = ipmi.metric_names(self.payload['Voltage'],
-                                                 prefix, sufix, **extra)
-
+        voltage_metrics_name = ipmi.metric_names(voltage_category_info)
         self.assertEqual(len(voltage_metrics_name), 19)
         expected_metrics = [
             'baremetal_voltage_mem_vtt_pg',
@@ -585,11 +585,9 @@ class TestPayloadsParser(unittest.TestCase):
         for metric in expected_metrics:
             self.assertIn(metric, voltage_metrics_name)
 
-        ipmi.prometheus_format(self.payload['Voltage'], self.node_name,
-                               self.node_uuid, self.instance_uuid,
-                               self.metric_registry, voltage_metrics_name,
-                               ipmi_format)
-
+        ipmi.prometheus_format(voltage_category_info,
+                               self.metric_registry,
+                               voltage_metrics_name)
         self.assertEqual(0.0, self.metric_registry.get_sample_value(
             'baremetal_voltage_mem_vddq_pg',
             {'node_name': self.node_name,

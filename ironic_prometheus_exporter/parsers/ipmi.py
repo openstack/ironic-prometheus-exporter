@@ -59,14 +59,13 @@ CATEGORY_PARAMS = {
 }
 
 
-def metric_names(payload, prefix, sufix, **kwargs):
-    LOG.info('metric_names function called with payload=%s' % str(payload))
-    LOG.info('prefix=%s | sufix=%s | kwargs=%s' %
-             (prefix, sufix, str(kwargs.items())))
+def metric_names(category_info):
+    LOG.info('metric_names function called with data=%s' % str(category_info))
 
     metric_dic = {}
-    extract_unit = kwargs.get('extract_unit')
-    special_label = kwargs.get('special_label')
+    extract_unit = category_info.get('extra_params').get('extract_unit')
+    special_label = category_info.get('extra_params').get('special_label')
+    payload = category_info['data']
     for entry in payload:
         if special_label == 'fan':
             # NOTE (iurygregory): regex to remove a sequence of numbers and
@@ -88,7 +87,7 @@ def metric_names(payload, prefix, sufix, **kwargs):
             # e.g: 'Voltage 1 (0x6d)' will turn into ['voltage', '(xd)']
             e = re.sub(r'[\d]+', '', e).lower().split()
             label = '_'.join(e[:-1]).replace('-', '_')
-            if label in prefix:
+            if label in category_info['prefix']:
                 label = ''
         else:
             # NOTE (iurygregory): regex to remove all numbers
@@ -105,6 +104,8 @@ def metric_names(payload, prefix, sufix, **kwargs):
             if 'mem' not in label and 'memory' not in label:
                 label = 'memory_' + label
 
+        prefix = category_info['prefix']
+        sufix = category_info['sufix']
         metric_name = re.sub(r'[\W]', '_', prefix + label + sufix + unit)
         metric_name = re.sub(r'[_]+', '_', metric_name)
         if metric_name[0].isdigit():
@@ -116,7 +117,7 @@ def metric_names(payload, prefix, sufix, **kwargs):
     return metric_dic
 
 
-def extract_labels(entries, payload, node_name, node_uuid, instance_uuid):
+def extract_labels(entries, category_info):
     """ This function extract the labels to be used by a metric
 
     If a metric has many entries we add the 'Sensor ID' information as label
@@ -127,35 +128,36 @@ def extract_labels(entries, payload, node_name, node_uuid, instance_uuid):
     metric ('Temp (0x1)' and 'Temp (0x2)') and one entry for 'Inlet Temp (0x5)'
     and other for 'Exhaust Temp (0x6)', this will produce a dictionary where
     the keys are the entries and the values are the respective label to be used
-    when writting the metrics in the Prometheus format.
+    when writing the metrics in the Prometheus format.
     {'Inlet Temp (0x5)': '{node_name=...}',
      'Exhaust Temp (0x6)': '{node_name=...}',
      'Temp (0x1)': '{node_name=...,sensor=Temp1}',
      'Temp (0x2)': '{node_name=...,sensor=Temp2}'}
 
-    returns: a dictionarty of dictionaries {<entry>: {label_name: label_value}}
+    returns: a dictionary of dictionaries {<entry>: {label_name: label_value}}
     """
-    LOG.info('extract_labels function called with: entries=%s | payload=%s | \
-             node_name=%s' % (str(entries), str(payload), node_name))
+    LOG.info('extract_labels function called with: entries=%s | data=%s | \
+             node_name=%s' % (str(entries), str(category_info['data']),
+             category_info['node_name']))
     if len(entries) == 1:
-        status = payload[entries[0]].get('Status')
-        labels = {'node_name': node_name,
-                  'node_uuid': node_uuid,
-                  'instance_uuid': instance_uuid,
-                  'entity_id': payload[entries[0]]['Entity ID'],
-                  'sensor_id': payload[entries[0]]['Sensor ID']}
+        status = category_info['data'][entries[0]].get('Status')
+        labels = {'node_name': category_info['node_name'],
+                  'node_uuid': category_info['node_uuid'],
+                  'instance_uuid': category_info['instance_uuid'],
+                  'entity_id': category_info['data'][entries[0]]['Entity ID'],
+                  'sensor_id': category_info['data'][entries[0]]['Sensor ID']}
         if status:
             labels['status'] = status
         return {entries[0]: labels}
     entries_labels = {}
     for entry in entries:
         try:
-            entity_id = payload[entry]['Entity ID']
-            sensor_id = payload[entry]['Sensor ID']
-            status = payload[entry].get('Status')
-            metric_label = {'node_name': node_name,
-                            'node_uuid': node_uuid,
-                            'instance_uuid': instance_uuid,
+            entity_id = category_info['data'][entry]['Entity ID']
+            sensor_id = category_info['data'][entry]['Sensor ID']
+            status = category_info['data'][entry].get('Status')
+            metric_label = {'node_name': category_info['node_name'],
+                            'node_uuid': category_info['node_uuid'],
+                            'instance_uuid': category_info['instance_uuid'],
                             'entity_id': entity_id,
                             'sensor_id': sensor_id}
             if status:
@@ -166,18 +168,19 @@ def extract_labels(entries, payload, node_name, node_uuid, instance_uuid):
     return entries_labels
 
 
-def extract_values(entries, payload, use_ipmi_format=True):
-    LOG.info('extract_values function called with: entries=%s | payload=%s |'
-             % (str(entries), str(payload)))
+def extract_values(entries, category_info):
+    LOG.info('extract_values function called with: entries=%s | info=%s |'
+             % (str(entries), str(category_info['data'])))
     values = {}
     for entry in entries:
         try:
             no_values = ['No Reading', 'Disabled']
-            if payload[entry]['Sensor Reading'] in no_values:
+            if category_info['data'][entry]['Sensor Reading'] in no_values:
                 values[entry] = None
             else:
-                sensor_values = payload[entry]['Sensor Reading'].split()
-                if not use_ipmi_format:
+                sensor_values = (category_info['data'][entry]
+                                 ['Sensor Reading'].split())
+                if not category_info['use_ipmi_format']:
                     if not re.search(r'(\d+(\.\d*)?|\.\d+)', sensor_values[0]):
                         raise Exception("No valid value in Sensor Reading")
                     values[entry] = sensor_values[0]
@@ -192,15 +195,11 @@ def extract_values(entries, payload, use_ipmi_format=True):
     return values
 
 
-def prometheus_format(payload, node_name, node_uuid, instance_uuid,
-                      ipmi_metric_registry, available_metrics,
-                      use_ipmi_format):
+def prometheus_format(category_info, ipmi_metric_registry, available_metrics):
     for metric in available_metrics:
         entries = available_metrics[metric]
-        labels = extract_labels(entries, payload, node_name, node_uuid,
-                                instance_uuid)
-        values = extract_values(entries, payload,
-                                use_ipmi_format=use_ipmi_format)
+        labels = extract_labels(entries, category_info)
+        values = extract_values(entries, category_info)
         if all(v is None for v in values.values()):
             continue
         g = Gauge(metric, '', labelnames=labels.get(entries[0]).keys(),
@@ -211,27 +210,27 @@ def prometheus_format(payload, node_name, node_uuid, instance_uuid,
             g.labels(**labels[e]).set(values[e])
 
 
-def category_registry(category_name, payload, node_name, node_uuid,
-                      instance_uuid, ipmi_metric_registry):
-    if category_name in CATEGORY_PARAMS:
-        prefix = CATEGORY_PARAMS[category_name]['prefix']
-        sufix = CATEGORY_PARAMS[category_name]['sufix']
-        extra = CATEGORY_PARAMS[category_name]['extra_params']
-        available_metrics = metric_names(payload, prefix, sufix, **extra)
-        use_ipmi_format = CATEGORY_PARAMS[category_name]['use_ipmi_format']
-        prometheus_format(payload, node_name, node_uuid, instance_uuid,
-                          ipmi_metric_registry, available_metrics,
-                          use_ipmi_format)
+def category_registry(node_message, ipmi_metric_registry):
+    for ipmi_category in node_message['payload']:
+        if ipmi_category.lower() in CATEGORY_PARAMS:
+            category_dict = CATEGORY_PARAMS[ipmi_category.lower()].copy()
+            category_dict['data'] = node_message['payload'][ipmi_category]
+            category_dict['node_name'] = node_message['node_name']
+            category_dict['node_uuid'] = node_message['node_uuid']
+            category_dict['instance_uuid'] = node_message['instance_uuid']
+            available_metrics = metric_names(category_dict)
+            prometheus_format(category_dict, ipmi_metric_registry,
+                              available_metrics)
 
 
-def timestamp_registry(timestamp, node_name, node_uuid, instance_uuid,
-                       ipmi_metric_registry):
+def timestamp_registry(node_information, ipmi_metric_registry):
     metric = 'baremetal_last_payload_timestamp_seconds'
-    labels = {'node_name': node_name,
-              'node_uuid': node_uuid,
-              'instance_uuid': instance_uuid}
+    labels = {'node_name': node_information['node_name'],
+              'node_uuid': node_information['node_uuid'],
+              'instance_uuid': node_information['instance_uuid']}
     dt_1970 = datetime(1970, 1, 1, 0, 0, 0)
-    dt_timestamp = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%f')
+    dt_timestamp = datetime.strptime(node_information['timestamp'],
+                                     '%Y-%m-%dT%H:%M:%S.%f')
     value = int((dt_timestamp - dt_1970).total_seconds())
     g = Gauge(metric, 'Timestamp of the last received payload',
               labelnames=labels.keys(), registry=ipmi_metric_registry)
