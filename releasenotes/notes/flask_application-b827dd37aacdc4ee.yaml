@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Adds a Flask Application that can accept requests under `/metrics`.
+    The response to requests have `text/plain` type and the content is always
+    the aggregation of all files stored in
+    `[oslo_messaging_notifications]/location` in the `ironic.conf`.
+    To run the application you can use any Web Server Gateway and set the
+    application to `ironic_prometheus_exporter.app.wsgi:application`.
