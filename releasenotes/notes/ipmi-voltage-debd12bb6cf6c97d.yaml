@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Adds support to parse the ipmi metrics based on the `Voltage` payload.
