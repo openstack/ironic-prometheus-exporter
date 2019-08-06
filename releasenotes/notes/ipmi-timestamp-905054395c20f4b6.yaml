@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds a metric called `baremetal_last_payload_timestamp_seconds` that can be
+    used in Prometheus to query if a baremetal node stopped sending information
+    for a period of time.
