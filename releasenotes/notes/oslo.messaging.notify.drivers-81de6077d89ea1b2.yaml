@@ -1,0 +1,28 @@
+---
+features:
+  - |
+    Adds two new `oslo_messaging_notifications` drivers:
+
+    * `prometheus_exporter`: the sensor data of each baremetal node is
+      transformed into Prometheus metrics when possible and stored in a file.
+
+    * `file_exporter`: stores the raw sensor data of each baremetal node in
+      a file. It can be used to see how is the format of the data for a
+      specific driver before creating the parser for it.
+
+    To use any of the driver it's necessary to update the `ironic.conf` with
+    the following configurations:
+
+    .. code-block:: text
+
+      [conductor]
+      send_sensor_data=true
+
+      [oslo_messaging_notifications]
+      driver= <driver>
+      transport_url=fake://
+      location= <absolute path for directory>
+
+
+    The files created by the drivers will always contain the latest
+    information about the node.
