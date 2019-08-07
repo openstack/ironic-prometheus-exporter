@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Adds the initial support to parse ipmi metrics based on the following
+    payloads: `Management`, `Temperature`, `System`, `Current`, `Version`,
+    `Memory`, `Power`, `Watchdog2` and `Fan`.
+    The metrics are generated in a format that is valid to be consumed by
+    Prometheus by using the `prometheus client`.
