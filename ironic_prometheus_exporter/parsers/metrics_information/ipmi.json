@@ -1,0 +1,96 @@
+{
+    "baremetal_front_led_panel":
+        "The System Board Management Subsys Health",
+    "baremetal_temp_celsius":
+        "The temperature of each Processor",
+    "baremetal_exhaust_temp_celsius":
+        "The exhaust temperature for the Systeam Board",
+    "baremetal_inlet_temp_celsius":
+        "The inlet temperature for the Systeam Board",
+    "baremetal_system_unknown":
+        "Unknown System Event",
+    "baremetal_system_post_err":
+        "The System Firmware progress",
+    "baremetal_current":
+        "Current power supply",
+    "baremetal_pwr_consumption":
+        "Current power consumption",
+    "baremetal_tpm_presence":
+        "Indicates if the Trusted Platform Module is present",
+    "baremetal_hdwr_version_err":
+        "Indicates if there is a hardware version error",
+    "baremetal_chassis_mismatch":
+        "Indicates if there is a mismatch in the chassis information",
+    "baremetal_memory_ecc_corr_err":
+        "Status of the ECC Corr Err",
+    "baremetal_idpt_mem_fail":
+        "Status of the iDPT Mem Fail",
+    "baremetal_memory_ecc_uncorr_err":
+        "Status of the ECC Uncorr Err",
+    "baremetal_memory_mirrored":
+        "Status of the Memory Mirrored",
+    "baremetal_mem_ecc_warning":
+        "Status of the Mem ECC Warning",
+    "baremetal_memory_b":
+        "Status of the Memory B",
+    "baremetal_memory_a":
+        "Status of the Memory A",
+    "baremetal_memory_usb_over_current":
+        "Status of the USB Over-current",
+    "baremetal_memory_post_pkg_repair":
+        "Status of the POST Pkg Repair",
+    "baremetal_memory_spared":
+        "Status of the Memory Spared",
+    "baremetal_power_ps_redundancy":
+        "Indicates if there is redundancy for power supply",
+    "baremetal_power_status":
+        "Indicates the status of the power supply",
+    "baremetal_os_watchdog_time":
+        "watchdog timer expirations",
+    "baremetal_os_watchdog":
+        "Indicates if watchdog is enabled",
+    "baremetal_fan_redundancy":
+        "Indicates if fan redundancy is actived",
+    "baremetal_fan_rpm":
+        "Indicates the fan speed",
+    "baremetal_last_payload_timestamp_seconds":
+        "Timestamp of the last received payload",
+    "baremetal_voltage_mem_vtt_pg":
+        "Status of the MEM___ VTT PG",
+    "baremetal_voltage_sw_pg":
+        "Status of the SW PG",
+    "baremetal_voltage_vsa_pg":
+        "Status of the VSA PG",
+    "baremetal_voltage_vcore_pg":
+        "Status of the VCORE PG",
+    "baremetal_voltage_volts":
+        "Indicates the voltage for the power supply",
+    "baremetal_voltage_dimm_pg":
+        "Status of the DIMM PG",
+    "baremetal_voltage_vsbm_sw_pg":
+        "Status of the VSBM SW PG",
+    "baremetal_voltage_ndc_pg":
+        "Status of the NDC PG",
+    "baremetal_voltage_ps_pg_fail":
+        "Status of the PS_ PG FAIL",
+    "baremetal_voltage_vccio_pg":
+        "Status of the VCCIO PG",
+    "baremetal_voltage_vsb_sw_pg":
+        "Status of the VSB__ SW PG",
+    "baremetal_voltage_mem_vddq_pg":
+        "Status of the MEM___ VDDQ PG",
+    "baremetal_voltage_bp_pg":
+        "Status of the BP PG",
+    "baremetal_voltage_a_pg":
+        "Status of the A PG",
+    "baremetal_voltage_fivr_pg":
+        "Status of the FIVR PG",
+    "baremetal_voltage_pvnn_sw_pg":
+        "Status of the PVNN SW PG",
+    "baremetal_voltage_mem_vpp_pg":
+        "Status of the MEM___ VPP PG",
+    "baremetal_voltage_pfault_fail_safe":
+        "Status of the Pfault Fail Safe",
+    "baremetal_voltage_b_pg":
+        "Status of the B PG"
+}

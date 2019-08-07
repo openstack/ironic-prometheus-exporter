@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Adds support to add a description for each ipmi metric.

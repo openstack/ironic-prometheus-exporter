@@ -10,7 +10,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import logging
+import pkg_resources
 import re
 
 from datetime import datetime
@@ -69,6 +71,11 @@ CATEGORY_PARAMS = {
                                  'special_label': 'voltage'},
                 'use_ipmi_format': True}
 }
+
+
+IPMI_JSON = pkg_resources.resource_filename(__name__,
+                                            "metrics_information/ipmi.json")
+IPMI_METRICS_DESCRIPTION = json.load(open(IPMI_JSON))
 
 
 def metric_names(category_info):
@@ -214,7 +221,8 @@ def prometheus_format(category_info, ipmi_metric_registry, available_metrics):
         values = extract_values(entries, category_info)
         if all(v is None for v in values.values()):
             continue
-        g = Gauge(metric, '', labelnames=labels.get(entries[0]).keys(),
+        g = Gauge(metric, get_metric_description(metric),
+                  labelnames=list(labels.get(entries[0])),
                   registry=ipmi_metric_registry)
         for e in entries:
             if values[e] is None:
@@ -244,6 +252,10 @@ def timestamp_registry(node_information, ipmi_metric_registry):
     dt_timestamp = datetime.strptime(node_information['timestamp'],
                                      '%Y-%m-%dT%H:%M:%S.%f')
     value = int((dt_timestamp - dt_1970).total_seconds())
-    g = Gauge(metric, 'Timestamp of the last received payload',
-              labelnames=labels.keys(), registry=ipmi_metric_registry)
+    g = Gauge(metric, get_metric_description(metric),
+              labelnames=list(labels), registry=ipmi_metric_registry)
     g.labels(**labels).set(value)
+
+
+def get_metric_description(metric_name):
+    return IPMI_METRICS_DESCRIPTION.get(metric_name, '')
