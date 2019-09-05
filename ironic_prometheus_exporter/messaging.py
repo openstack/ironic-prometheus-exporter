@@ -14,6 +14,7 @@ import logging
 import os
 
 from ironic_prometheus_exporter.parsers import ipmi
+from ironic_prometheus_exporter.parsers import header
 from oslo_config import cfg
 from oslo_messaging.notify import notifier
 from prometheus_client import write_to_textfile, CollectorRegistry
@@ -45,7 +46,7 @@ class PrometheusFileDriver(notifier.Driver):
             if message['event_type'] == 'hardware.ipmi.metrics':
                 registry = CollectorRegistry()
                 node_message = message['payload']
-                ipmi.timestamp_registry(node_message, registry)
+                header.timestamp_registry(node_message, registry)
                 ipmi.category_registry(node_message, registry)
                 nodeFile = os.path.join(self.location,
                                         node_message['node_name'])
