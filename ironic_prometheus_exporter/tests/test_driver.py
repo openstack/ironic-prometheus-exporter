@@ -3,6 +3,7 @@ import json
 import os
 import oslo_messaging
 
+import ironic_prometheus_exporter
 from ironic_prometheus_exporter.messaging import PrometheusFileDriver
 from oslo_messaging.tests import utils as test_utils
 
@@ -32,9 +33,17 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
         transport = oslo_messaging.get_notification_transport(self.conf)
         driver = PrometheusFileDriver(self.conf, None, transport)
 
-        msg1 = json.load(open('./ironic_prometheus_exporter/tests/data.json'))
+        sample_file_1 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-ipmi-1.json')
+
+        sample_file_2 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-ipmi-2.json')
+
+        msg1 = json.load(open(sample_file_1))
         node1 = msg1['payload']['node_name']
-        msg2 = json.load(open('./ironic_prometheus_exporter/tests/data2.json'))
+        msg2 = json.load(open(sample_file_2))
         # Override data2 node_name, node_uuid, instance_uuid
         msg2['payload']['node_name'] = node1
         msg2['payload']['node_uuid'] = msg1['payload']['node_uuid']
@@ -61,9 +70,17 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
         transport = oslo_messaging.get_notification_transport(self.conf)
         driver = PrometheusFileDriver(self.conf, None, transport)
 
-        msg1 = json.load(open('./ironic_prometheus_exporter/tests/data.json'))
+        sample_file_1 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-ipmi-1.json')
+
+        sample_file_2 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-ipmi-2.json')
+
+        msg1 = json.load(open(sample_file_1))
         node1 = msg1['payload']['node_name']
-        msg2 = json.load(open('./ironic_prometheus_exporter/tests/data2.json'))
+        msg2 = json.load(open(sample_file_2))
         node2 = msg2['payload']['node_name']
         self.assertNotEqual(msg1['payload']['timestamp'],
                             msg2['payload']['timestamp'])

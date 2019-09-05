@@ -1,11 +1,17 @@
 import json
+import os
 import unittest
 
+import ironic_prometheus_exporter
 from ironic_prometheus_exporter.parsers import ipmi
 from prometheus_client import CollectorRegistry
 
 
-DATA = json.load(open('./ironic_prometheus_exporter/tests/data.json'))
+sample_file = os.path.join(
+    os.path.dirname(ironic_prometheus_exporter.__file__),
+    'tests', 'json_samples', 'notification-ipmi-1.json')
+
+DATA = json.load(open(sample_file))
 
 
 class TestPayloadsParser(unittest.TestCase):
