@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Adds support for handling Redfish-originated metrics alongside
+    IPMI ones.

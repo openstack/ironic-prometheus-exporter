@@ -25,7 +25,7 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
     def setUp(self):
         super(TestPrometheusFileNotifier, self).setUp()
 
-    def test_instanciate(self):
+    def test_instantiate(self):
         temp_dir = self.useFixture(fixtures.TempDir()).path
         self.config(location=temp_dir,
                     group='oslo_messaging_notifications')
@@ -72,8 +72,8 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
                      if os.path.isfile(os.path.join(DIR, name))]
         self.assertEqual(node1, node2)
         self.assertEqual(len(all_files), 1)
-        self.assertIn(node1, all_files)
-        self.assertIn(node2, all_files)
+        self.assertIn(node1 + '-hardware.ipmi.metrics', all_files)
+        self.assertIn(node2 + '-hardware.ipmi.metrics', all_files)
 
     def test_messages_from_different_nodes(self):
         temp_dir = self.useFixture(fixtures.TempDir()).path
@@ -104,5 +104,35 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
         all_files = [name for name in os.listdir(DIR)
                      if os.path.isfile(os.path.join(DIR, name))]
         self.assertEqual(len(all_files), 2)
-        self.assertIn(node1, all_files)
-        self.assertIn(node2, all_files)
+        self.assertIn(node1 + '-hardware.ipmi.metrics', all_files)
+        self.assertIn(node2 + '-hardware.ipmi.metrics', all_files)
+
+    def test_messages_of_different_types(self):
+        temp_dir = self.useFixture(fixtures.TempDir()).path
+        self.config(location=temp_dir,
+                    group='oslo_messaging_notifications')
+        transport = oslo_messaging.get_notification_transport(self.conf)
+        driver = PrometheusFileDriver(self.conf, None, transport)
+
+        sample_file_1 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-ipmi-1.json')
+
+        sample_file_2 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-redfish.json')
+
+        msg1 = json.load(open(sample_file_1))
+        node1 = msg1['payload']['node_name']
+        msg2 = json.load(open(sample_file_2))
+        node2 = msg2['payload']['node_name']
+
+        driver.notify(None, msg1, 'info', 0)
+        driver.notify(None, msg2, 'info', 0)
+
+        DIR = self.conf.oslo_messaging_notifications.location
+        all_files = [name for name in os.listdir(DIR)
+                     if os.path.isfile(os.path.join(DIR, name))]
+        self.assertEqual(len(all_files), 2)
+        self.assertIn(node1 + '-hardware.ipmi.metrics', all_files)
+        self.assertIn(node2 + '-hardware.redfish.metrics', all_files)

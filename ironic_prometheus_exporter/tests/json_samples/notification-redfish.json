@@ -1,0 +1,67 @@
+{
+    "priority": "INFO",
+    "event_type": "hardware.redfish.metrics",
+    "timestamp": "2019-03-29 20:12:26.885347",
+    "publisher_id": "None.localhost.localdomain",
+    "payload": {
+        "instance_uuid": "ac2aa2fd-6e1a-41c8-a114-2084c8705228",
+        "node_uuid": "ac2aa2fd-6e1a-41c8-a114-2084c8705228",
+        "event_type": "hardware.redfish.metrics.update",
+        "timestamp": "2019-03-29T20:12:22.989020",
+        "node_name": "knilab-master-u9",
+        "message_id": "85d6b2c8-fe57-432d-868a-330e0e28cf34",
+        "payload": {
+            "Temperature": {
+                "XXX-YYY-ZZZ@ZZZ-YYY-XXX": {
+                    "identity": "XXX-YYY-ZZZ",
+                    "max_reading_range_temp": 120,
+                    "min_reading_range_temp": 0,
+                    "physical_context": "CPU",
+                    "reading_celsius": 62,
+                    "sensor_number": 1,
+                    "health": "OK",
+                    "state": "enabled"
+                }
+            },
+            "Power": {
+                "0:Power@ZZZ-YYY-XXX": {
+                    "health": "OK",
+                    "last_power_output_watts": 650,
+                    "line_input_voltage": 220,
+                    "maximum_frequency_hz": 63,
+                    "maximum_voltage": 250,
+                    "minimum_frequency_hz": 47,
+                    "minimum_voltage": 185,
+                    "output_wattage": 1450,
+                    "power_capacity_watts": 1450,
+                    "serial_number": "SN010203040506",
+                    "state": "enabled"
+                }
+            },
+            "Fan": {
+                "XXX-YYY-ZZZ@ZZZ-YYY-XXX": {
+                    "identity": "XXX-YYY-ZZZ",
+                    "max_reading_range": 10000,
+                    "min_reading_range": 0,
+                    "physical_context": "CPU",
+                    "reading": 6000,
+                    "reading_units": "RPM",
+                    "serial_number": "SN010203040506",
+                    "health": "OK",
+                    "state": "enabled"
+                }
+            },
+            "Drive": {
+                "32ADF365C6C1B7BD:XXX-YYY-ZZZ@ZZZ-YYY-XXX": {
+                    "capacity_bytes": 3750000000,
+                    "failure_predicted": true,
+                    "health": "OK",
+                    "identity": "32ADF365C6C1B7BD",
+                    "model": "IBM 350A",
+                    "state": "enabled"
+                }
+            }
+        }
+    },
+    "message_id": "2c0da1e8-1958-484f-9bdd-9117d717f7fa"
+}

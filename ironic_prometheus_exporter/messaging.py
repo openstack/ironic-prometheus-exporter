@@ -15,6 +15,7 @@ import os
 
 from ironic_prometheus_exporter.parsers import ipmi
 from ironic_prometheus_exporter.parsers import header
+from ironic_prometheus_exporter.parsers import redfish
 from oslo_config import cfg
 from oslo_messaging.notify import notifier
 from prometheus_client import write_to_textfile, CollectorRegistry
@@ -43,14 +44,23 @@ class PrometheusFileDriver(notifier.Driver):
 
     def notify(self, ctxt, message, priority, retry):
         try:
-            if message['event_type'] == 'hardware.ipmi.metrics':
-                registry = CollectorRegistry()
-                node_message = message['payload']
-                header.timestamp_registry(node_message, registry)
+            registry = CollectorRegistry()
+
+            event_type = message['event_type']
+            node_message = message['payload']
+            header.timestamp_registry(node_message, registry)
+
+            if event_type == 'hardware.ipmi.metrics':
                 ipmi.category_registry(node_message, registry)
-                nodeFile = os.path.join(self.location,
-                                        node_message['node_name'])
-                write_to_textfile(nodeFile, registry)
+
+            elif event_type == 'hardware.redfish.metrics':
+                redfish.category_registry(node_message, registry)
+
+            nodeFile = os.path.join(
+                self.location,
+                node_message['node_name'] + '-' + event_type)
+            write_to_textfile(nodeFile, registry)
+
         except Exception as e:
             LOG.error(e)
 
