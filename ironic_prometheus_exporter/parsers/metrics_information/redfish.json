@@ -1,0 +1,54 @@
+{
+    "baremetal_power_status":
+        "Power supply unit health status (0 - OK, 1 - failure)",
+    "baremetal_temp_room_celsius":
+        "Room temperature expressed in Celsius",
+    "baremetal_temp_intake_celsius":
+        "Intake air temperature expressed in Celsius",
+    "baremetal_temp_exhaust_celsius":
+        "Exhaust air temperature expressed in Celsius",
+    "baremetal_temp_front_celsius":
+        "Front chassis temperature expressed in Celsius",
+    "baremetal_temp_back_celsius":
+        "Back chassis temperature expressed in Celsius",
+    "baremetal_temp_upper_celsius":
+        "Upper chassis temperature expressed in Celsius",
+    "baremetal_temp_lower_celsius":
+        "Lower chassis temperature expressed in Celsius",
+    "baremetal_temp_cpu_celsius":
+        "CPU temperature expressed in Celsius",
+    "baremetal_temp_gpu_celsius":
+        "GPU temperature expressed in Celsius",
+    "baremetal_temp_backplane_celsius":
+        "Backplane temperature expressed in Celsius",
+    "baremetal_temp_systemboard_celsius":
+        "System Board temperature expressed in Celsius",
+    "baremetal_temp_powersupply_celsius":
+        "Power Supply temperature expressed in Celsius",
+    "baremetal_temp_voltageregulator_celsius":
+        "Voltage Regulator temperature expressed in Celsius",
+    "baremetal_temp_storagedevice_celsius":
+        "Storage Device temperature expressed in Celsius",
+    "baremetal_temp_networkingdevice_celsius":
+        "Networking Device temperature expressed in Celsius",
+    "baremetal_temp_computebay_celsius":
+        "Compute Bay temperature expressed in Celsius",
+    "baremetal_temp_storagebay_celsius":
+        "Storage Bay temperature expressed in Celsius",
+    "baremetal_temp_networkbay_celsius":
+        "Network Bay temperature expressed in Celsius",
+    "baremetal_temp_expansionbay_celsius":
+        "Expansion Bay temperature expressed in Celsius",
+    "baremetal_temp_powersupplybay_celsius":
+        "Power Supply Bay temperature expressed in Celsius",
+    "baremetal_temp_memory_celsius":
+        "Memory unit temperature expressed in Celsius",
+    "baremetal_temp_chassis_celsius":
+        "Chassis temperature expressed in Celsius",
+    "baremetal_temp_fan_celsius":
+        "Cooling fan temperature expressed in Celsius",
+    "baremetal_fan_status":
+        "Cooling fan health status (0 - OK, 1 - failure)",
+    "baremetal_drive_status":
+        "Storage drive health status (0 - OK, 1 - failure)"
+}

@@ -17,6 +17,9 @@ import re
 
 from prometheus_client import Gauge
 
+from ironic_prometheus_exporter.parsers import descriptions
+
+
 # NOTE (iurygregory): most of the sensor readings come in the ipmi format
 # each type of sensor consider a different range of values that aren't integers
 # (eg: 0h, 2eh), 0h will be published as 0 and the other values as 1, this way
@@ -220,7 +223,8 @@ def prometheus_format(category_info, ipmi_metric_registry, available_metrics):
         values = extract_values(entries, category_info)
         if all(v is None for v in values.values()):
             continue
-        g = Gauge(metric, get_metric_description(metric),
+        desc = descriptions.get_metric_description('ipmi', metric)
+        g = Gauge(metric, desc,
                   labelnames=list(labels.get(entries[0])),
                   registry=ipmi_metric_registry)
         for e in entries:
@@ -240,7 +244,3 @@ def category_registry(node_message, ipmi_metric_registry):
             available_metrics = metric_names(category_dict)
             prometheus_format(category_dict, ipmi_metric_registry,
                               available_metrics)
-
-
-def get_metric_description(metric_name):
-    return IPMI_METRICS_DESCRIPTION.get(metric_name, '')

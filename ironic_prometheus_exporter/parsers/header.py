@@ -11,7 +11,10 @@
 #    under the License.
 
 from datetime import datetime
+
 from prometheus_client import Gauge
+
+from ironic_prometheus_exporter.parsers import descriptions
 
 
 def timestamp_registry(node_information, ipmi_metric_registry):
@@ -23,6 +26,11 @@ def timestamp_registry(node_information, ipmi_metric_registry):
     dt_timestamp = datetime.strptime(node_information['timestamp'],
                                      '%Y-%m-%dT%H:%M:%S.%f')
     value = int((dt_timestamp - dt_1970).total_seconds())
-    g = Gauge(metric, 'Timestamp of the last received payload',
-              labelnames=labels.keys(), registry=ipmi_metric_registry)
+
+    desc = descriptions.get_metric_description('header', metric)
+
+    g = Gauge(
+        metric, desc, labelnames=labels,
+        registry=ipmi_metric_registry)
+
     g.labels(**labels).set(value)

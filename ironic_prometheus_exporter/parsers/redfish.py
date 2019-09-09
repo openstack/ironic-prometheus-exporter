@@ -15,6 +15,8 @@ import logging
 
 from prometheus_client import Gauge
 
+from ironic_prometheus_exporter.parsers import descriptions
+
 
 LOG = logging.getLogger(__name__)
 
@@ -250,7 +252,9 @@ def category_registry(node_message, metrics_registry):
 
         for value, labels in details:
 
-            gauge = Gauge(metric, '', labelnames=labels,
+            desc = descriptions.get_metric_description('redfish', metric)
+
+            gauge = Gauge(metric, desc, labelnames=labels,
                           registry=metrics_registry)
 
             gauge.labels(**labels).set(value)
