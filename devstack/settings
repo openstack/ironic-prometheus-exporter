@@ -1,0 +1,3 @@
+define_plugin ironic-prometheus-exporter
+plugin_requires ironic-prometheus-exporter ironic
+enable_service ironic-prometheus-exporter
