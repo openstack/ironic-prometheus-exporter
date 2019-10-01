@@ -1,5 +1,94 @@
+- job:
+    name: ironic-prometheus-exporter-redfish
+    description: Job that installs the exporter with redfish driver.
+    parent: devstack
+    nodeset: openstack-single-node-bionic
+    timeout: 5400
+    required-projects:
+      - openstack/ironic
+      - openstack/ironic-python-agent
+      - openstack/ironic-python-agent-builder
+      - openstack/ironic-tempest-plugin
+      - openstack/virtualbmc
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^api-ref/.*$
+      - ^doc/.*$
+      - ^driver-requirements.txt$
+      - ^install-guide/.*$
+      - ^ironic/locale/.*$
+      - ^ironic/tests/.*$
+      - ^releasenotes/.*$
+      - ^setup.cfg$
+      - ^tools/.*$
+      - ^tox.ini$
+      - ^ironic_prometheus_exporter/tests/*$
+    vars:
+      devstack_localrc:
+        DEFAULT_INSTANCE_TYPE: baremetal
+        FORCE_CONFIG_DRIVE: True
+        INSTALL_TEMPEST: False # Don't install a tempest package globaly
+        TEMPEST_PLUGINS: "{{ ansible_user_dir }}/src/opendev.org/openstack/ironic-tempest-plugin"
+        VIRT_DRIVER: ironic
+        BUILD_TIMEOUT: 720
+        IRONIC_BAREMETAL_BASIC_OPS: True
+        IRONIC_BUILD_DEPLOY_RAMDISK: False
+        IRONIC_CALLBACK_TIMEOUT: 600
+        IRONIC_DEPLOY_DRIVER: redfish
+        IRONIC_ENABLED_HARDWARE_TYPES: redfish
+        IRONIC_DEFAULT_RESCUE_INTERFACE: ""
+        EBTABLES_RACE_FIX: True
+        IRONIC_INSPECTOR_BUILD_RAMDISK: False
+        IRONIC_RAMDISK_TYPE: tinyipa
+        IRONIC_VM_COUNT: 1
+        IRONIC_VM_EPHEMERAL_DISK: 1
+        IRONIC_VM_LOG_DIR: '{{ devstack_base_dir }}/ironic-bm-logs'
+        IRONIC_VM_SPECS_RAM: 384
+        IRONIC_VM_SPECS_DISK: 4
+        IRONIC_DEFAULT_DEPLOY_INTERFACE: iscsi
+        Q_AGENT: openvswitch
+        Q_ML2_TENANT_NETWORK_TYPE: vxlan
+        SERVICE_TIMEOUT: 90
+        USE_PYTHON3: True
+        IRONIC_PROMETHEUS_EXPORTER_LOCATION: '{{ devstack_base_dir }}/ironic-bm-logs/ipe'
+      devstack_plugins:
+        ironic: https://opendev.org/openstack/ironic
+        ironic-prometheus-exporter: https://opendev.org/openstack/ironic-prometheus-exporter
+      zuul_copy_output:
+        '{{ devstack_base_dir }}/ironic-bm-logs': 'logs'
+        '{{ devstack_base_dir }}/ironic-bm-logs/ipe': 'logs'
+      devstack_services:
+        q-agt: false
+        q-dhcp: false
+        q-l3: false
+        q-meta: false
+        q-metering: false
+        q-svc: false
+        neutron-api: true
+        neutron-agent: true
+        neutron-dhcp: true
+        neutron-l3: true
+        neutron-metadata-agent: true
+        neutron-metering: true
+        c-api: False
+        c-bak: False
+        c-sch: False
+        c-vol: False
+        cinder: False
+        s-account: False
+        s-container: False
+        s-object: False
+        s-proxy: False
+
 - project:
     templates:
       - check-requirements
       - openstack-python3-ussuri-jobs
       - release-notes-jobs-python3
+    check:
+      jobs:
+        - ironic-prometheus-exporter-redfish
+    gate:
+      queue: ironic
+      jobs:
+        - ironic-prometheus-exporter-redfish
