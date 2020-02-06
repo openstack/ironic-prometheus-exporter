@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixes the bug in the redfish parser that would raise
+    `Duplicated timeseries in CollectorRegistry: {'metric_name'}` when a
+    metric have more that one value and different values for the labels.
