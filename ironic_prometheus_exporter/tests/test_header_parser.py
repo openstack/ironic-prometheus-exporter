@@ -15,6 +15,7 @@ import os
 import unittest
 
 import ironic_prometheus_exporter
+from ironic_prometheus_exporter import utils as ipe_utils
 from ironic_prometheus_exporter.parsers import header
 from prometheus_client import CollectorRegistry
 
@@ -45,4 +46,22 @@ class TestPayloadsParser(unittest.TestCase):
             {'node_name': self.node_name,
              'node_uuid': self.node_uuid,
              'instance_uuid': self.instance_uuid}
+        ))
+
+    def test_none_for_instance_uuid(self):
+        sample_file_2 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-header-with-none.json')
+        msg2 = json.load(open(sample_file_2))
+        self.assertIsNone(msg2['payload']['instance_uuid'])
+        valid_labels = ipe_utils.update_instance_uuid(msg2['payload'])
+        self.assertEqual(valid_labels['instance_uuid'],
+                         msg2['payload']['node_uuid'])
+
+        header.timestamp_registry(msg2['payload'], self.metric_registry)
+        self.assertEqual(1553890342.0, self.metric_registry.get_sample_value(
+            'baremetal_last_payload_timestamp_seconds',
+            {'node_name': msg2['payload']['node_name'],
+             'node_uuid': msg2['payload']['node_uuid'],
+             'instance_uuid': msg2['payload']['node_uuid']}
         ))

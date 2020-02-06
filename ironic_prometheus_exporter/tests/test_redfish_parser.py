@@ -3,6 +3,7 @@ import os
 import unittest
 
 import ironic_prometheus_exporter
+from ironic_prometheus_exporter import utils as ipe_utils
 from ironic_prometheus_exporter.parsers import redfish
 from prometheus_client import CollectorRegistry
 
@@ -119,3 +120,34 @@ class TestPayloadsParser(unittest.TestCase):
             'baremetal_drive_status', label)
 
         self.assertEqual(0, sensor_value)
+
+    def test_none_instance_uuid(self):
+        sample_file2 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples',
+            'notification-redfish-none-instance_uuid.json')
+        msg2 = json.load(open(sample_file2))
+
+        self.assertIsNone(msg2['payload']['instance_uuid'])
+        valid_labels = ipe_utils.update_instance_uuid(msg2['payload'])
+        self.assertEqual(valid_labels['instance_uuid'],
+                         msg2['payload']['node_uuid'])
+
+        metrics = redfish.build_power_metrics(msg2['payload'])
+
+        expected_metric = 'baremetal_power_status'
+
+        self.assertIn(expected_metric, metrics)
+
+        self.assertEqual(0, metrics[expected_metric][0][0])
+
+        expected_labels = {
+            'entity_id': 'PSU',
+            'instance_uuid': 'c2bd00b9-9881-4179-8b7b-bf786ec3696b',
+            'node_name': 'knilab-master-u9',
+            'node_uuid': 'c2bd00b9-9881-4179-8b7b-bf786ec3696b',
+            'sensor_id': '0:Power@ZZZ-YYY-XXX'
+        }
+
+        self.assertEqual(
+            expected_labels, metrics[expected_metric][0][1])

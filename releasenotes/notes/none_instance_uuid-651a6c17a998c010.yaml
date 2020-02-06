@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixes the value for `instance_uuid` field when the value is `None` in all
+    parsers, we will use the same value of `node_uuid` in `instance_uuid`.
