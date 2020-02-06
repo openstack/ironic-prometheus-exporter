@@ -17,6 +17,7 @@ import re
 
 from prometheus_client import Gauge
 
+from ironic_prometheus_exporter import utils as ipe_utils
 from ironic_prometheus_exporter.parsers import descriptions
 
 
@@ -230,7 +231,8 @@ def prometheus_format(category_info, ipmi_metric_registry, available_metrics):
         for e in entries:
             if values[e] is None:
                 continue
-            g.labels(**labels[e]).set(values[e])
+            valid_labels = ipe_utils.update_instance_uuid(labels[e])
+            g.labels(**valid_labels).set(values[e])
 
 
 def category_registry(node_message, ipmi_metric_registry):

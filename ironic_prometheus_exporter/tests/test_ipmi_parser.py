@@ -15,6 +15,7 @@ import os
 import unittest
 
 import ironic_prometheus_exporter
+from ironic_prometheus_exporter import utils as ipe_utils
 from ironic_prometheus_exporter.parsers import ipmi
 from prometheus_client import CollectorRegistry
 
@@ -920,3 +921,37 @@ class TestPayloadsParser(unittest.TestCase):
              'instance_uuid': self.instance_uuid,
              'sensor_id': 'Pfault Fail Safe (0x74)'}
         ))
+
+    def test_none_instance_uuid(self):
+        sample_file2 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples',
+            'notification-ipmi-none-instance_uuid.json')
+        msg2 = json.load(open(sample_file2))
+        self.assertIsNone(msg2['payload']['instance_uuid'])
+        valid_labels = ipe_utils.update_instance_uuid(msg2['payload'])
+        self.assertEqual(valid_labels['instance_uuid'],
+                         msg2['payload']['node_uuid'])
+
+        management_category_info = ipmi.CATEGORY_PARAMS['management'].copy()
+        management_category_info['data'] = \
+            msg2['payload']['payload']['Management'].copy()
+        management_category_info['node_name'] = msg2['payload']['node_name']
+        management_category_info['node_uuid'] = msg2['payload']['node_uuid']
+        management_category_info['instance_uuid'] = \
+            msg2['payload']['instance_uuid']
+
+        management_metrics_name = ipmi.metric_names(management_category_info)
+        self.assertEqual(len(management_metrics_name), 1)
+        self.assertIn('baremetal_front_led_panel', management_metrics_name)
+
+        ipmi.prometheus_format(management_category_info,
+                               self.metric_registry,
+                               management_metrics_name)
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_front_led_panel',
+            {'node_name': 'knilab-master-u9',
+             'node_uuid': msg2['payload']['node_uuid'],
+             'instance_uuid': msg2['payload']['node_uuid'],
+             'entity_id': '7.1 (System Board)',
+             'sensor_id': 'Front LED Panel (0x23)'}))

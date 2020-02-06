@@ -15,6 +15,7 @@ import logging
 
 from prometheus_client import Gauge
 
+from ironic_prometheus_exporter import utils as ipe_utils
 from ironic_prometheus_exporter.parsers import descriptions
 
 
@@ -261,4 +262,5 @@ def category_registry(node_message, metrics_registry):
                       registry=metrics_registry)
 
         for value, labels in details:
-            gauge.labels(**labels).set(value)
+            valid_labels = ipe_utils.update_instance_uuid(labels)
+            gauge.labels(**valid_labels).set(value)

@@ -14,6 +14,7 @@ from datetime import datetime
 
 from prometheus_client import Gauge
 
+from ironic_prometheus_exporter import utils as ipe_utils
 from ironic_prometheus_exporter.parsers import descriptions
 
 
@@ -33,4 +34,5 @@ def timestamp_registry(node_information, ipmi_metric_registry):
         metric, desc, labelnames=labels,
         registry=ipmi_metric_registry)
 
-    g.labels(**labels).set(value)
+    valid_labels = ipe_utils.update_instance_uuid(labels)
+    g.labels(**valid_labels).set(value)

@@ -1,0 +1,17 @@
+{
+    "priority": "INFO",
+    "event_type": "hardware.redfish.metrics",
+    "timestamp": "2019-03-29 20:12:26.885347",
+    "publisher_id": "None.localhost.localdomain",
+    "payload": {
+        "instance_uuid":null ,
+        "node_uuid": "6d85703a-565d-469a-96ce-30b6de53079d",
+        "event_type": "hardware.redfish.metrics.update",
+        "timestamp": "2019-03-29T20:12:22.989020",
+        "node_name": "knilab-master-u9",
+        "message_id": "85d6b2c8-fe57-432d-868a-330e0e28cf34",
+        "payload": {
+        }
+    },
+    "message_id": "2c0da1e8-1958-484f-9bdd-9117d717f7fa"
+}
