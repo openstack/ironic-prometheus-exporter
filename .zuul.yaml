@@ -86,6 +86,7 @@
       - openstack-python-jobs
       - openstack-python3-train-jobs
       - release-notes-jobs-python3
+      - publish-openstack-docs-pti
     check:
       jobs:
         - ironic-prometheus-exporter-redfish
