@@ -10,9 +10,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from ironic_prometheus_exporter.parsers import descriptions
-
 from oslo_messaging.tests import utils as test_utils
+
+from ironic_prometheus_exporter.parsers import descriptions
 
 
 class TestMetricsDescriptions(test_utils.BaseTestCase):

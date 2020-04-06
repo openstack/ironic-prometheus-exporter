@@ -13,12 +13,15 @@
 import logging
 import os
 
-from ironic_prometheus_exporter.parsers import ipmi
-from ironic_prometheus_exporter.parsers import header
-from ironic_prometheus_exporter.parsers import redfish
 from oslo_config import cfg
 from oslo_messaging.notify import notifier
-from prometheus_client import write_to_textfile, CollectorRegistry
+from prometheus_client import CollectorRegistry
+from prometheus_client import write_to_textfile
+
+from ironic_prometheus_exporter.parsers import header
+from ironic_prometheus_exporter.parsers import ipmi
+from ironic_prometheus_exporter.parsers import redfish
+
 
 LOG = logging.getLogger(__name__)
 

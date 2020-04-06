@@ -14,8 +14,8 @@ from datetime import datetime
 
 from prometheus_client import Gauge
 
-from ironic_prometheus_exporter import utils as ipe_utils
 from ironic_prometheus_exporter.parsers import descriptions
+from ironic_prometheus_exporter import utils as ipe_utils
 
 
 def timestamp_registry(node_information, ipmi_metric_registry):

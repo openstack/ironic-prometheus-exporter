@@ -12,13 +12,13 @@
 
 import json
 import logging
-import pkg_resources
 import re
 
+import pkg_resources
 from prometheus_client import Gauge
 
-from ironic_prometheus_exporter import utils as ipe_utils
 from ironic_prometheus_exporter.parsers import descriptions
+from ironic_prometheus_exporter import utils as ipe_utils
 
 
 # NOTE (iurygregory): most of the sensor readings come in the ipmi format
@@ -140,7 +140,7 @@ def metric_names(category_info):
 
 
 def extract_labels(entries, category_info):
-    """ This function extract the labels to be used by a metric
+    """This function extract the labels to be used by a metric
 
     If a metric has many entries we add the 'Sensor ID' information as label
     otherwise we will only use the default label that is the 'node_name' and

@@ -10,14 +10,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import fixtures
 import json
 import os
+
+import fixtures
 import oslo_messaging
+from oslo_messaging.tests import utils as test_utils
 
 import ironic_prometheus_exporter
 from ironic_prometheus_exporter.messaging import PrometheusFileDriver
-from oslo_messaging.tests import utils as test_utils
 
 
 class TestPrometheusFileNotifier(test_utils.BaseTestCase):

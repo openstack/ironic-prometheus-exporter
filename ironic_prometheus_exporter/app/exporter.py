@@ -14,7 +14,11 @@ import configparser
 import logging
 import os
 
-from flask import abort, Flask, Response
+from flask import abort
+from flask import Flask
+from flask import Response
+
+
 application = Flask(__name__)
 LOG = logging.getLogger(__name__)
 

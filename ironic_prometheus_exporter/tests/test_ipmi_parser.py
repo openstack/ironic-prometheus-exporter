@@ -14,10 +14,11 @@ import json
 import os
 import unittest
 
-import ironic_prometheus_exporter
-from ironic_prometheus_exporter import utils as ipe_utils
-from ironic_prometheus_exporter.parsers import ipmi
 from prometheus_client import CollectorRegistry
+
+import ironic_prometheus_exporter
+from ironic_prometheus_exporter.parsers import ipmi
+from ironic_prometheus_exporter import utils as ipe_utils
 
 
 sample_file = os.path.join(
