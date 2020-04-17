@@ -59,7 +59,7 @@ oslo.utils==4.1.0
 oslotest==3.2.0
 Paste==3.4.0
 PasteDeploy==2.1.0
-pbr==2.0.0
+pbr==3.1.1
 prettytable==0.7.2
 prometheus-client==0.6.0
 pycodestyle==2.5.0
