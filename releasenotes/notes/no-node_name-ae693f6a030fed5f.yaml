@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Fix an issue where IPE fails if the node does not have `node_name` set

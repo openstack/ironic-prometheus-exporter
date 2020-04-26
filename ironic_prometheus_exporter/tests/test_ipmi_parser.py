@@ -956,3 +956,88 @@ class TestPayloadsParser(unittest.TestCase):
              'instance_uuid': msg2['payload']['node_uuid'],
              'entity_id': '7.1 (System Board)',
              'sensor_id': 'Front LED Panel (0x23)'}))
+
+
+class TestPayloadsParserNoneNodeName(unittest.TestCase):
+
+    def setUp(self):
+        sample_file = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples',
+            'notification-ipmi-none-node_name.json')
+        msg = json.load(open(sample_file))
+        self.node_message = msg['payload']
+        self.node_name = msg['payload']['node_name']
+        self.node_uuid = msg['payload']['node_uuid']
+        self.instance_uuid = msg['payload']['instance_uuid']
+        self.timestamp = msg['payload']['timestamp']
+        self.payload = msg['payload']['payload']
+        self.metric_registry = CollectorRegistry()
+
+    def test_management_parser(self):
+        management_category_info = ipmi.CATEGORY_PARAMS['management'].copy()
+        management_category_info['data'] = \
+            self.node_message['payload']['Management'].copy()
+        management_category_info['node_name'] = self.node_name
+        management_category_info['node_uuid'] = self.node_uuid
+        management_category_info['instance_uuid'] = self.instance_uuid
+
+        management_metrics_name = ipmi.metric_names(management_category_info)
+        self.assertEqual(len(management_metrics_name), 1)
+        self.assertIn('baremetal_front_led_panel', management_metrics_name)
+
+        ipmi.prometheus_format(management_category_info,
+                               self.metric_registry,
+                               management_metrics_name)
+        self.assertEqual(0.0, self.metric_registry.get_sample_value(
+            'baremetal_front_led_panel',
+            {'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'entity_id': '7.1 (System Board)',
+             'sensor_id': 'Front LED Panel (0x23)'}))
+
+    def test_temperature_parser(self):
+        temperature_category_info = ipmi.CATEGORY_PARAMS['temperature'].copy()
+        temperature_category_info['data'] = \
+            self.node_message['payload']['Temperature'].copy()
+        temperature_category_info['node_name'] = self.node_name
+        temperature_category_info['node_uuid'] = self.node_uuid
+        temperature_category_info['instance_uuid'] = self.instance_uuid
+
+        temperature_metrics_name = ipmi.metric_names(temperature_category_info)
+        self.assertEqual(len(temperature_metrics_name), 3)
+        self.assertIn('baremetal_temp_celsius', temperature_metrics_name)
+        self.assertIn('baremetal_exhaust_temp_celsius',
+                      temperature_metrics_name)
+        self.assertIn('baremetal_inlet_temp_celsius', temperature_metrics_name)
+
+        ipmi.prometheus_format(temperature_category_info,
+                               self.metric_registry,
+                               temperature_metrics_name)
+        self.assertEqual(21.0, self.metric_registry.get_sample_value(
+            'baremetal_inlet_temp_celsius',
+            {'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'entity_id': '7.1 (System Board)',
+             'sensor_id': 'Inlet Temp (0x5)',
+             'status': 'ok'}
+        ))
+        self.assertEqual(36.0, self.metric_registry.get_sample_value(
+            'baremetal_exhaust_temp_celsius',
+            {'node_uuid': self.node_uuid,
+             'instance_uuid': self.instance_uuid,
+             'entity_id': '7.1 (System Board)',
+             'sensor_id': 'Exhaust Temp (0x6)',
+             'status': 'ok'}))
+        self.assertEqual(44.0, self.metric_registry.get_sample_value(
+            'baremetal_temp_celsius', {'sensor_id': 'Temp (0x1)',
+                                       'node_uuid': self.node_uuid,
+                                       'instance_uuid': self.instance_uuid,
+                                       'entity_id': '3.1 (Processor)',
+                                       'status': 'ok'}))
+        self.assertEqual(43.0, self.metric_registry.get_sample_value(
+            'baremetal_temp_celsius', {'sensor_id': 'Temp (0x2)',
+                                       'node_uuid': self.node_uuid,
+                                       'instance_uuid': self.instance_uuid,
+                                       'entity_id': '3.2 (Processor)',
+                                       'status': 'ok'}))

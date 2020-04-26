@@ -59,9 +59,10 @@ class PrometheusFileDriver(notifier.Driver):
             elif event_type == 'hardware.redfish.metrics':
                 redfish.category_registry(node_message, registry)
 
+            field = (node_message.get('node_name') or
+                     node_message.get('node_uuid'))
             nodeFile = os.path.join(
-                self.location,
-                node_message['node_name'] + '-' + event_type)
+                self.location, field + '-' + event_type)
             write_to_textfile(nodeFile, registry)
 
         except Exception as e:

@@ -66,3 +66,31 @@ class TestPayloadsParser(unittest.TestCase):
              'node_uuid': msg2['payload']['node_uuid'],
              'instance_uuid': msg2['payload']['node_uuid']}
         ))
+
+    def test_none_for_node_name(self):
+        sample_file_2 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-none-node_name.json')
+        msg2 = json.load(open(sample_file_2))
+        self.assertIsNone(msg2['payload']['node_name'])
+
+        header.timestamp_registry(msg2['payload'], self.metric_registry)
+        self.assertEqual(1553890342.0, self.metric_registry.get_sample_value(
+            'baremetal_last_payload_timestamp_seconds',
+            {'node_uuid': msg2['payload']['node_uuid'],
+             'instance_uuid': msg2['payload']['instance_uuid']}
+        ))
+
+    def test_empty_for_node_name(self):
+        sample_file_2 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-empty-node_name.json')
+        msg2 = json.load(open(sample_file_2))
+        self.assertEqual(msg2['payload']['node_name'], "")
+
+        header.timestamp_registry(msg2['payload'], self.metric_registry)
+        self.assertEqual(1553890342.0, self.metric_registry.get_sample_value(
+            'baremetal_last_payload_timestamp_seconds',
+            {'node_uuid': msg2['payload']['node_uuid'],
+             'instance_uuid': msg2['payload']['instance_uuid']}
+        ))
