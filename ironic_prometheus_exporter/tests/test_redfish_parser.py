@@ -164,3 +164,35 @@ class TestPayloadsParser(unittest.TestCase):
 
         self.assertEqual(
             expected_labels, metrics[expected_metric][0][1])
+
+
+class TestPayloadsParserNoneNodeName(unittest.TestCase):
+
+    def setUp(self):
+        sample_file_none = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples',
+            'notification-redfish-none-node_name.json')
+        msg = json.load(open(sample_file_none))
+        self.node_message = msg['payload']
+        self.node_uuid = msg['payload']['node_uuid']
+        self.instance_uuid = msg['payload']['instance_uuid']
+
+    def test_build_temperature_metrics(self):
+        metrics = redfish.build_temperature_metrics(self.node_message)
+
+        expected_metric = 'baremetal_temp_cpu_celsius'
+
+        self.assertIn(expected_metric, metrics)
+
+        self.assertEqual(62, metrics[expected_metric][0][0])
+
+        expected_labels = {
+            'entity_id': 'CPU',
+            'instance_uuid': '85d6b2c8-fe57-432d-868a-330e0e28cf34',
+            'node_uuid': 'c2bd00b9-9881-4179-8b7b-bf786ec3696b',
+            'sensor_id': 1
+        }
+
+        self.assertEqual(
+            expected_labels, metrics[expected_metric][0][1])

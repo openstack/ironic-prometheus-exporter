@@ -18,11 +18,12 @@ from ironic_prometheus_exporter.parsers import descriptions
 from ironic_prometheus_exporter import utils as ipe_utils
 
 
-def timestamp_registry(node_information, ipmi_metric_registry):
+def timestamp_registry(node_information, metric_registry):
     metric = 'baremetal_last_payload_timestamp_seconds'
-    labels = {'node_name': node_information['node_name'],
-              'node_uuid': node_information['node_uuid'],
+    labels = {'node_uuid': node_information['node_uuid'],
               'instance_uuid': node_information['instance_uuid']}
+    if node_information['node_name']:
+        labels['node_name'] = node_information['node_name']
     dt_1970 = datetime(1970, 1, 1, 0, 0, 0)
     dt_timestamp = datetime.strptime(node_information['timestamp'],
                                      '%Y-%m-%dT%H:%M:%S.%f')
@@ -32,7 +33,7 @@ def timestamp_registry(node_information, ipmi_metric_registry):
 
     g = Gauge(
         metric, desc, labelnames=labels,
-        registry=ipmi_metric_registry)
+        registry=metric_registry)
 
     valid_labels = ipe_utils.update_instance_uuid(labels)
     g.labels(**valid_labels).set(value)
