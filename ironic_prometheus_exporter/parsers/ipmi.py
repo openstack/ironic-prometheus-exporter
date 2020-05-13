@@ -82,8 +82,6 @@ IPMI_METRICS_DESCRIPTION = json.load(open(IPMI_JSON))
 
 
 def metric_names(category_info):
-    LOG.info('metric_names function called with data=%s' % str(category_info))
-
     metric_dic = {}
     extract_unit = category_info.get('extra_params').get('extract_unit')
     special_label = category_info.get('extra_params').get('special_label')
@@ -158,9 +156,6 @@ def extract_labels(entries, category_info):
 
     returns: a dictionary of dictionaries {<entry>: {label_name: label_value}}
     """
-    LOG.info('extract_labels function called with: entries=%s | data=%s | \
-             node_name=%s' % (str(entries), str(category_info['data']),
-             category_info['node_name']))
     if len(entries) == 1:
         status = category_info['data'][entries[0]].get('Status')
         labels = {'node_name': category_info['node_name'],
@@ -191,8 +186,6 @@ def extract_labels(entries, category_info):
 
 
 def extract_values(entries, category_info):
-    LOG.info('extract_values function called with: entries=%s | info=%s |'
-             % (str(entries), str(category_info['data'])))
     values = {}
     for entry in entries:
         try:
