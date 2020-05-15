@@ -87,6 +87,7 @@
       - openstack-python3-victoria-jobs
       - release-notes-jobs-python3
       - publish-openstack-docs-pti
+      - openstack-cover-jobs
     check:
       jobs:
         - ironic-prometheus-exporter-redfish
