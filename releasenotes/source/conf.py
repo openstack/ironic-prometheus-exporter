@@ -47,9 +47,8 @@ extensions = [
 ]
 
 
-repository_name = 'openstack/ironic-prometheus-exporter'
-use_storyboard = True
-
+openstackdocs_repo_name = 'openstack/ironic-prometheus-exporter'
+openstackdocs_use_storyboard = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -65,7 +64,6 @@ master_doc = 'index'
 
 # -- Project information -----------------------------------------------------
 
-project = u'Ironic Prometheus Exporter Release Notes'
 copyright = u'2019, Ironic Prometheus Exporter Developers'
 
 # Release notes are version independent.
@@ -104,7 +102,7 @@ exclude_patterns = []
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'native'
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
