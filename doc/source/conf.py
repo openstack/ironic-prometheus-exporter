@@ -48,7 +48,7 @@ add_function_parentheses = True
 add_module_names = True
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'native'
 
 # -- Options for HTML output --------------------------------------------------
 
@@ -57,6 +57,11 @@ pygments_style = 'sphinx'
 # html_theme_path = ["."]
 html_theme = 'openstackdocs'
 # html_static_path = ['static']
+
+# openstackdocstheme options
+openstackdocs_repo_name = 'openstack/ironic-prometheus-exporter'
+openstackdocs_pdf_link = True
+openstackdocs_use_storyboard = True
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'ironic_prometheus_exporter_doc'
