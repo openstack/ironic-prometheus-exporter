@@ -11,3 +11,4 @@ using `OpenStack Bare Metal Service (ironic) <https://docs.openstack.org/ironic/
 * Documentation: https://docs.openstack.org/ironic-prometheus-exporter/
 * Source: https://opendev.org/openstack/ironic-prometheus-exporter
 * Bugs: https://storyboard.openstack.org/#!/project/openstack/ironic-prometheus-exporter
+* Release Notes: https://docs.openstack.org/releasenotes/ironic-prometheus-exporter
