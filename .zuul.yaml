@@ -58,18 +58,12 @@
         '{{ devstack_base_dir }}/ironic-bm-logs': 'logs'
         '{{ devstack_base_dir }}/ironic-bm-logs/ipe': 'logs'
       devstack_services:
-        q-agt: false
-        q-dhcp: false
-        q-l3: false
-        q-meta: false
-        q-metering: false
-        q-svc: false
-        neutron-api: true
-        neutron-agent: true
-        neutron-dhcp: true
-        neutron-l3: true
-        neutron-metadata-agent: true
-        neutron-metering: true
+        q-agt: true
+        q-dhcp: true
+        q-l3: true
+        q-meta: true
+        q-metering: true
+        q-svc: true
         c-api: False
         c-bak: False
         c-sch: False
