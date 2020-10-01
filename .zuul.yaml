@@ -45,7 +45,7 @@
         IRONIC_VM_LOG_DIR: '{{ devstack_base_dir }}/ironic-bm-logs'
         IRONIC_VM_SPECS_RAM: 512
         IRONIC_VM_SPECS_DISK: 4
-        IRONIC_DEFAULT_DEPLOY_INTERFACE: direct 
+        IRONIC_DEFAULT_DEPLOY_INTERFACE: direct
         Q_AGENT: openvswitch
         Q_ML2_TENANT_NETWORK_TYPE: vxlan
         SERVICE_TIMEOUT: 90
@@ -79,7 +79,7 @@
     templates:
       - check-requirements
       - openstack-lower-constraints-jobs
-      - openstack-python3-victoria-jobs
+      - openstack-python3-wallaby-jobs
       - release-notes-jobs-python3
       - publish-openstack-docs-pti
       - openstack-cover-jobs
