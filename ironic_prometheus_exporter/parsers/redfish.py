@@ -23,9 +23,11 @@ LOG = logging.getLogger(__name__)
 
 
 def _build_labels(node_message):
+    fields = ['node_name', 'node_uuid', 'instance_uuid']
+    if not node_message['node_name']:
+        fields.remove('node_name')
     return {
-        k: node_message[k]
-        for k in ('node_name', 'node_uuid', 'instance_uuid')
+        k: node_message[k] for k in fields
     }
 
 

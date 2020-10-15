@@ -163,6 +163,8 @@ def extract_labels(entries, category_info):
                   'instance_uuid': category_info['instance_uuid'],
                   'entity_id': category_info['data'][entries[0]]['Entity ID'],
                   'sensor_id': category_info['data'][entries[0]]['Sensor ID']}
+        if not category_info['node_name']:
+            del labels['node_name']
         if status:
             labels['status'] = status
         return {entries[0]: labels}
@@ -177,6 +179,8 @@ def extract_labels(entries, category_info):
                             'instance_uuid': category_info['instance_uuid'],
                             'entity_id': entity_id,
                             'sensor_id': sensor_id}
+            if not category_info['node_name']:
+                del metric_label['node_name']
             if status:
                 metric_label['status'] = status
             entries_labels[entry] = metric_label
