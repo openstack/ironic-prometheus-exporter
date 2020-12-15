@@ -2,7 +2,7 @@
     name: ironic-prometheus-exporter-redfish
     description: Job that installs the exporter with redfish driver.
     parent: devstack
-    nodeset: openstack-single-node-bionic
+    nodeset: openstack-single-node-focal
     timeout: 5400
     required-projects:
       - openstack/ironic
@@ -58,6 +58,7 @@
         '{{ devstack_base_dir }}/ironic-bm-logs': 'logs'
         '{{ devstack_base_dir }}/ironic-bm-logs/ipe': 'logs'
       devstack_services:
+        dstat: false
         q-agt: true
         q-dhcp: true
         q-l3: true
@@ -77,7 +78,6 @@
 - project:
     templates:
       - check-requirements
-      - openstack-lower-constraints-jobs
       - openstack-python3-victoria-jobs
       - release-notes-jobs-python3
       - publish-openstack-docs-pti

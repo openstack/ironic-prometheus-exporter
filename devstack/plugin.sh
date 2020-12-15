@@ -28,7 +28,7 @@ function configure_ironic_prometheus_exporter {
 
     local gunicorn_ipe_cmd
 
-    gunicorn_ipe_cmd=$(which gunicorn3)
+    gunicorn_ipe_cmd=$(which gunicorn)
     gunicorn_ipe_cmd+=" -b ${HOST_IP}:${IRONIC_PROMETHEUS_EXPORTER_PORT}"
     gunicorn_ipe_cmd+=" --env IRONIC_CONFIG=$IRONIC_CONFIG"
     gunicorn_ipe_cmd+=" --env FLASK_DEBUG=1 -w 4"
