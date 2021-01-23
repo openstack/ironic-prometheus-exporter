@@ -35,5 +35,8 @@ on RDO.
    $ pip install entry_point_inspector --user <user>
    $ epi group show oslo.messaging.notify.drivers
 
-- Output in case of a successful installation: `prometheus_exporter` is listed in the `Name` column and the `Error` column should be empty.
-- Output in case of an unsuccessful installation: `prometheus_exporter` is listed in the `Name` column and the `Error` column will have more information.
+- Output in case of a successful installation: `prometheus_exporter` is listed
+  in the `Name` column and the `Error` column should be empty.
+- Output in case of an unsuccessful installation: `prometheus_exporter` is
+  listed in the `Name` column and the `Error` column will have more
+  information.

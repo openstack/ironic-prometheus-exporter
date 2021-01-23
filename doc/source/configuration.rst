@@ -1,8 +1,9 @@
 Configuration
 =============
 
-To enable the ironic-prometheus-exporter to collect the sensor data from Ironic,
-it's necessary to enable some configuration parameters in the ``ironic.conf``.
+To enable the ironic-prometheus-exporter to collect the sensor data from
+Ironic, it's necessary to enable some configuration parameters in the
+``ironic.conf``.
 Below you can see an example of the required configuration, the table
 :ref:`ipe_conf` shows all the available configuration options.
 
@@ -24,7 +25,8 @@ Example of configuration
 
 .. _ipe_conf:
 
-.. list-table:: Configuration options for the ironic-prometheus-exporter in Ironic
+.. list-table:: Configuration options for the ironic-prometheus-exporter
+   in Ironic
    :widths: 15 15 10 50 10
    :header-rows: 1
 
@@ -70,5 +72,5 @@ Example of configuration
 
 
 .. note::
-   After doing the modifications in the ``ironic.conf`` don't forget to re-start
-   the ironic-conductor service
+   After doing the modifications in the ``ironic.conf`` don't forget to
+   re-start the ironic-conductor service
