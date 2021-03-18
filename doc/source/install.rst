@@ -17,7 +17,7 @@ Ironic Prometheus Exporter Installation
 ---------------------------------------
 
 The ironic-prometheus-exporter is available as pip package and as rpm package
-on RDO.
+on RDO, it can also be installed using `bifrost`_.
 
 #. Package Installation
 
@@ -40,3 +40,6 @@ on RDO.
 - Output in case of an unsuccessful installation: `prometheus_exporter` is
   listed in the `Name` column and the `Error` column will have more
   information.
+
+
+.. _bifrost: https://docs.openstack.org/bifrost/latest/install/index.html#quick-start-with-bifrost-cli
