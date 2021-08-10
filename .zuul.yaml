@@ -48,6 +48,7 @@
         IRONIC_DEFAULT_DEPLOY_INTERFACE: direct
         Q_AGENT: openvswitch
         Q_ML2_TENANT_NETWORK_TYPE: vxlan
+        Q_ML2_PLUGIN_MECHANISM_DRIVERS: openvswitch
         SERVICE_TIMEOUT: 90
         USE_PYTHON3: True
         IRONIC_PROMETHEUS_EXPORTER_LOCATION: '{{ devstack_base_dir }}/ironic-bm-logs/ipe'
@@ -64,6 +65,9 @@
         q-l3: true
         q-meta: true
         q-metering: true
+        ovn-controller: false
+        ovn-northd: false
+        q-ovn-metadata-agent: false
         q-svc: true
         c-api: False
         c-bak: False
