@@ -38,7 +38,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-copyright = u'2020, Ironic Developers'
+copyright = '2020, Ironic Developers'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
@@ -74,6 +74,6 @@ latex_use_xindy = False
 latex_documents = [
     ('index',
      'doc-ipe.tex',
-     u'Ironic Prometheus Exporter Documentation',
-     u'Ironic Developers', 'manual'),
+     'Ironic Prometheus Exporter Documentation',
+     'Ironic Developers', 'manual'),
 ]

@@ -64,7 +64,7 @@ master_doc = 'index'
 
 # -- Project information -----------------------------------------------------
 
-copyright = u'2019, Ironic Prometheus Exporter Developers'
+copyright = '2019, Ironic Prometheus Exporter Developers'
 
 # Release notes are version independent.
 # The short X.Y version.
@@ -221,8 +221,8 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     ('index', 'IronicPrometheusExporterReleaseNotes.tex',
-     u'Ironic Prometheus Exporter Release Notes Documentation',
-     u'Ironic Prometheus Exporter Developers', 'manual'),
+     'Ironic Prometheus Exporter Release Notes Documentation',
+     'Ironic Prometheus Exporter Developers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -252,8 +252,8 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'ironicprometheusexporterreleasenotes',
-     u'Ironic Prometheus Exporter Release Notes Documentation',
-     [u'Ironic Prometheus Exporter Developers'], 1)
+     'Ironic Prometheus Exporter Release Notes Documentation',
+     ['Ironic Prometheus Exporter Developers'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -267,8 +267,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'IronicPrometheusExporterReleaseNotes',
-     u'Ironic Prometheus Exporter Release Notes Documentation',
-     u'Ironic Prometheus Exporter Developers',
+     'Ironic Prometheus Exporter Release Notes Documentation',
+     'Ironic Prometheus Exporter Developers',
      'IronicPrometheusExporterReleaseNotes',
      'One line description of project.',
      'Miscellaneous'),
