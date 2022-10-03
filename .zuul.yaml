@@ -86,10 +86,10 @@
       - openstack-python3-ussuri-jobs
       - release-notes-jobs-python3
       - publish-openstack-docs-pti
-    check:
-      jobs:
-        - ironic-prometheus-exporter-redfish
-    gate:
-      queue: ironic
-      jobs:
-        - ironic-prometheus-exporter-redfish
+    #NOTE(JayF): Removed 2022/11/1 due to repeated failures
+    #check:
+    #  jobs:
+    #    - ironic-prometheus-exporter-redfish
+    #gate:
+    #  jobs:
+    #    - ironic-prometheus-exporter-redfish
