@@ -87,6 +87,5 @@
       jobs:
         - ironic-prometheus-exporter-redfish
     gate:
-      queue: ironic
       jobs:
         - ironic-prometheus-exporter-redfish
