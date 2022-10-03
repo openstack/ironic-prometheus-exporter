@@ -85,9 +85,6 @@
     check:
       jobs:
         - ironic-prometheus-exporter-redfish
-        - bifrost-integration-tinyipa-keystone-centos-8
     gate:
-      queue: ironic
       jobs:
         - ironic-prometheus-exporter-redfish
-        - bifrost-integration-tinyipa-keystone-centos-8
