@@ -14,6 +14,10 @@ IPE_ERROR_LF="$IRONIC_VM_LOG_DIR/ipe_errors.log"
 
 function install_ironic_prometheus_exporter {
     git_clone_by_name "ironic-prometheus-exporter"
+    # NOTE(TheJulia): Version and use requirement is not established
+    # for gunicorn. It just so happens to be what the CI job uses,
+    # and is not an operational requirement.
+    pip_install gunicorn
     setup_dev_lib "ironic-prometheus-exporter"
 }
 
