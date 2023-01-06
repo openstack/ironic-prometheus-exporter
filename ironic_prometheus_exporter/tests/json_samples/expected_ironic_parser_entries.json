@@ -1,0 +1,261 @@
+[
+    {
+        "name": "ironic_post_clean_step_hook_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "driver", "driver": "agent"},
+        "value": 0.0050067901611328125,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_post_clean_step_hook_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "driver", "driver": "agent"},
+        "value": 3.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_post_deploy_step_hook_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "driver", "driver": "agent"},
+        "value": 0.010013580322265625,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_post_deploy_step_hook_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "driver", "driver": "agent"},
+        "value": 2.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_inspect_wait_timeouts_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 2007.3809623718262,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_inspect_wait_timeouts_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 214.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_deploy_timeouts_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 2200.153350830078,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_deploy_timeouts_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 214.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_cleanwait_timeouts_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 2424.9556064605713,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_cleanwait_timeouts_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 214.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_rescuewait_timeouts_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 1639.7652626037598,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_rescuewait_timeouts_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 214.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_orphan_nodes_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 1608.001708984375,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_orphan_nodes_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 214.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_orphan_allocations_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 1797.1274852752686,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_check_orphan_allocations_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 214.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_redfishmanagement_query_firmware_update_status_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "driver", "driver": "redfish"},
+        "value": 1598.8798141479492,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_redfishmanagement_query_firmware_update_status_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "driver", "driver": "redfish"},
+        "value": 214.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_redfishmanagement_query_firmware_update_failed_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "driver", "driver": "redfish"},
+        "value": 1955.6934833526611,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_redfishmanagement_query_firmware_update_failed_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "driver", "driver": "redfish"},
+        "value": 214.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_do_sync_power_state_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 16819.172620773315,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_do_sync_power_state_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 214.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_do_sync_power_state",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic"},
+        "value": 0.0,
+        "docs": "Point in time count of data point.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_sync_power_states_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 23187.243700027466,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_sync_power_states_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 214.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_pxe_base_pxebasemixin_check_boot_timeouts_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "driver", "driver": "pxe"},
+        "value": 1078.2177448272705,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_pxe_base_pxebasemixin_check_boot_timeouts_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "driver", "driver": "pxe"},
+        "value": 142.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_sensors_nodes_task_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 10648.590803146362,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_sensors_nodes_task_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 142.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_send_sensor_data_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 15062.613010406494,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_send_sensor_data_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 142.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_sync_local_state_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 276.4444351196289,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_sync_local_state_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 71.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_power_failure_recovery_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 166.60714149475098,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_power_failure_recovery_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 42.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_clean_up_caches_time",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 42.63949394226074,
+        "docs": "Total time (ms) spent.",
+        "type": "gauge"
+    },
+    {
+        "name": "ironic_conductormanager_clean_up_caches_call_count",
+        "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
+        "value": 3.0,
+        "docs": "Sum of calls recorded.",
+        "type": "gauge"
+    }
+]

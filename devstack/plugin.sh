@@ -23,9 +23,10 @@ function install_ironic_prometheus_exporter {
 
 function configure_ironic_prometheus_exporter {
     # Update ironic configuration file to use the exporter
-    iniset $IRONIC_CONF_FILE conductor send_sensor_data true
-    iniset $IRONIC_CONF_FILE conductor send_sensor_data_for_undeployed_nodes $COLLECT_DATA_UNDEPLOYED_NODES
-    iniset $IRONIC_CONF_FILE conductor send_sensor_data_interval 90
+    iniset $IRONIC_CONF_FILE sensor_data send_sensor_data true
+    iniset $IRONIC_CONF_FILE sensor_data enable_for_undeployed_nodes $COLLECT_DATA_UNDEPLOYED_NODES
+    iniset $IRONIC_CONF_FILE sensor_data interval 90
+    iniset $IRONIC_CONF_FILE metrics backend collector
     iniset $IRONIC_CONF_FILE oslo_messaging_notifications driver prometheus_exporter
     iniset $IRONIC_CONF_FILE oslo_messaging_notifications transport_url fake://
     iniset $IRONIC_CONF_FILE oslo_messaging_notifications location $IRONIC_PROMETHEUS_EXPORTER_LOCATION
@@ -66,7 +67,7 @@ function cleanup_ironic_prometheus_exporter {
 }
 
 function wait_for_data {
-    # Sleep for more than the [conductor]send_sensor_data_interval value
+    # Sleep for more than the [sensor_data]send_sensor_data_interval value
     # to verify if we can get data from the baremetal
     # FIXME(iurygregory): Add some logic to verify if the data already exists
     sleep 240
@@ -83,6 +84,13 @@ function check_data {
         fi
     else
         die $LINENO "Couldn't find $node_file in $IRONIC_PROMETHEUS_EXPORTER_LOCATION"
+    fi
+    local stats_file="$(hostname)-ironic.metrics"
+    if [ -f "$IRONIC_PROMETHEUS_EXPORTER_LOCATION/$stats_file" ]; then
+        echo "#### Metrics data ####"
+        curl "http://$HOST_IP:$IRONIC_PROMETHEUS_EXPORTER_PORT/metrics"
+    else
+        die $LINENO "Could not find $stats_file in $IRONIC_PROMETHEUS_EXPORTER_LOCATION"
     fi
 }
 

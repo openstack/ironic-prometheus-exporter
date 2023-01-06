@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Adds the capability for the ``ironic-prometheus-exporter`` to parse
+    metrics data from the ``ironic`` and ``ironic-conductor`` processes
+    to enable greater operator insight into the inner working and performance
+    of these services. This feature requires the ironic.conf file
+    ``[metrics]backend`` value to be set to ``collector``.

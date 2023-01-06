@@ -1,0 +1,111 @@
+{
+    "priority": "INFO",
+    "event_type": "ironic.metrics.update",
+    "timestamp": "2019-03-29 20:12:26.885347",
+    "publisher_id": "None.localhost.localdomain",
+    "payload": {
+        "instance_uuid": "ac2aa2fd-6e1a-41c8-a114-2084c8705228",
+        "node_uuid": "ac2aa2fd-6e1a-41c8-a114-2084c8705228",
+        "event_type": "hardware.redfish.metrics.update",
+        "timestamp": "2019-03-29T20:12:22.989020",
+        "message_id": "85d6b2c8-fe57-432d-868a-330e0e28cf34",
+        "hostname": "a-test-conductor",
+        "payload": {
+            "ironic.drivers.modules.agent_base.post_clean_step_hook": {
+                "count": 3,
+                "sum": 0.0050067901611328125,
+                "type": "timer"
+            },
+            "ironic.drivers.modules.agent_base.post_deploy_step_hook": {
+                "count": 2,
+                "sum": 0.010013580322265625,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._check_inspect_wait_timeouts": {
+                "count": 214,
+                "sum": 2007.3809623718262,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._check_deploy_timeouts": {
+                "count": 214,
+                "sum": 2200.153350830078,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._check_cleanwait_timeouts": {
+                "count": 214,
+                "sum": 2424.9556064605713,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._check_rescuewait_timeouts": {
+                "count": 214,
+                "sum": 1639.7652626037598,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._check_orphan_nodes": {
+                "count": 214,
+                "sum": 1608.001708984375,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._check_orphan_allocations": {
+                "count": 214,
+                "sum": 1797.1274852752686,
+                "type": "timer"
+            },
+            "ironic.drivers.modules.redfish.management.RedfishManagement._query_firmware_update_status": {
+                "count": 214,
+                "sum": 1598.8798141479492,
+                "type": "timer"
+            },
+            "ironic.drivers.modules.redfish.management.RedfishManagement._query_firmware_update_failed": {
+                "count": 214,
+                "sum": 1955.6934833526611,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.do_sync_power_state": {
+                "count": 214,
+                "sum": 16819.172620773315,
+                "type": "timer"
+            },
+            "ConductorManager.FailingPowerSyncCount": {
+                "value": 0,
+                "type": "gauge"
+            },
+            "ironic.conductor.manager.ConductorManager._sync_power_states": {
+                "count": 214,
+                "sum": 23187.243700027466,
+                "type": "timer"
+            },
+            "ironic.drivers.modules.pxe_base.PXEBaseMixin._check_boot_timeouts": {
+                "count": 142,
+                "sum": 1078.2177448272705,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._sensors_nodes_task": {
+                "count": 142,
+                "sum": 10648.590803146362,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._send_sensor_data": {
+                "count": 142,
+                "sum": 15062.613010406494,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._sync_local_state": {
+                "count": 71,
+                "sum": 276.4444351196289,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._power_failure_recovery": {
+                "count": 42,
+                "sum": 166.60714149475098,
+                "type": "timer"
+            },
+            "ironic.conductor.manager.ConductorManager._clean_up_caches": {
+                "count": 3,
+                "sum": 42.63949394226074,
+                "type": "timer"
+            }
+        }
+    },
+    "message_id": "2c0da1e8-1958-484f-9bdd-9117d717f7fa"
+}

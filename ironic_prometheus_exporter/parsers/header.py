@@ -19,6 +19,7 @@ from ironic_prometheus_exporter import utils as ipe_utils
 
 
 def timestamp_registry(node_information, metric_registry):
+    """Injects a last updated timestamp for a node."""
     metric = 'baremetal_last_payload_timestamp_seconds'
     labels = {'node_uuid': node_information['node_uuid'],
               'instance_uuid': node_information['instance_uuid']}
@@ -37,3 +38,21 @@ def timestamp_registry(node_information, metric_registry):
 
     valid_labels = ipe_utils.update_instance_uuid(labels)
     g.labels(**valid_labels).set(value)
+
+
+def timestamp_conductor_registry(payload, metric_registry):
+    """Injets a last updated at timestamp for a conductor."""
+    metric = 'conductor_service_last_payload_timestamp_seconds'
+    labels = {'hostname': payload['hostname']}
+    dt_1970 = datetime(1970, 1, 1, 0, 0, 0)
+    dt_timestamp = datetime.strptime(payload['timestamp'],
+                                     '%Y-%m-%dT%H:%M:%S.%f')
+    value = int((dt_timestamp - dt_1970).total_seconds())
+
+    desc = descriptions.get_metric_description('header', metric)
+
+    g = Gauge(
+        metric, desc, labelnames=labels,
+        registry=metric_registry)
+
+    g.labels(labels).set(value)

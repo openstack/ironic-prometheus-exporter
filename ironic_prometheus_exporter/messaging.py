@@ -20,6 +20,7 @@ from prometheus_client import write_to_textfile
 
 from ironic_prometheus_exporter.parsers import header
 from ironic_prometheus_exporter.parsers import ipmi
+from ironic_prometheus_exporter.parsers import ironic as ironic_parser
 from ironic_prometheus_exporter.parsers import redfish
 
 
@@ -48,25 +49,39 @@ class PrometheusFileDriver(notifier.Driver):
     def notify(self, ctxt, message, priority, retry):
         try:
             registry = CollectorRegistry()
-
             event_type = message['event_type']
-            node_message = message['payload']
-            header.timestamp_registry(node_message, registry)
+            payload = message['payload']
+            if event_type == 'ironic.metrics':
+                # We know this message payload is from a conductor itself
+                # and not for node drivers.
+                header.timestamp_conductor_registry(payload, registry)
+                ironic_parser.category_registry(payload, registry)
 
-            if event_type == 'hardware.ipmi.metrics':
-                ipmi.category_registry(node_message, registry)
+            else:
+                header.timestamp_registry(payload, registry)
+                if event_type == 'hardware.ipmi.metrics':
+                    ipmi.category_registry(payload, registry)
 
-            elif event_type == 'hardware.redfish.metrics':
-                redfish.category_registry(node_message, registry)
+                elif event_type == 'hardware.redfish.metrics':
+                    redfish.category_registry(payload, registry)
 
-            field = (node_message.get('node_name') or
-                     node_message.get('node_uuid'))
-            nodeFile = os.path.join(
+            # Order of preference is for a node Name, UUID, or
+            # payload hostname field to be used (i.e. for conductor
+            # message payloads).
+            field = (
+                payload.get('node_name') or
+                payload.get('node_uuid') or
+                payload.get('hostname')
+            )
+            statFile = os.path.join(
                 self.location, field + '-' + event_type)
-            write_to_textfile(nodeFile, registry)
+
+            # Writes to file for server pickup
+            write_to_textfile(statFile, registry)
 
         except Exception as e:
             LOG.error(e)
+            raise
 
 
 class SimpleFileDriver(notifier.Driver):
