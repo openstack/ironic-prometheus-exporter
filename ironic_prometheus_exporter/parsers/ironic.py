@@ -171,7 +171,7 @@ def category_registry(message, metrics_registry):
                            labelnames=list(labels.keys()),
                            registry=metrics_registry)
             # Prometheus_client doesn't directly expose a counter method
-            # to set a counterv alue directly.
+            # to set a counter value directly.
             metric.labels(**labels).set(value['count'])
             LOG.debug(f'Details of the metric {formatted_key} with labels '
                       '{labels}, value: %s', value['count'])

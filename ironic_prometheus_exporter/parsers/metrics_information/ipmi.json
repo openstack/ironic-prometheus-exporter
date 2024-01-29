@@ -50,7 +50,7 @@
     "baremetal_os_watchdog":
         "Indicates if watchdog is enabled",
     "baremetal_fan_redundancy":
-        "Indicates if fan redundancy is actived",
+        "Indicates if fan redundancy is activated",
     "baremetal_fan_rpm":
         "Indicates the fan speed",
     "baremetal_last_payload_timestamp_seconds":

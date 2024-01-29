@@ -78,7 +78,7 @@ function check_data {
     if [ -f "$IRONIC_PROMETHEUS_EXPORTER_LOCATION/$node_file" ]; then
         echo "Found $node_file in $IRONIC_PROMETHEUS_EXPORTER_LOCATION"
         if curl -s --head  --request  GET "http://$HOST_IP:$IRONIC_PROMETHEUS_EXPORTER_PORT/metrics" | grep "200 OK" > /dev/null; then
-            echo "Data successfully retrived from ironic-prometheus-exporter application"
+            echo "Data successfully retrieved from ironic-prometheus-exporter application"
         else
             die $LINENO "Couldn't get data from ironic-prometheus-exporter application"
         fi
