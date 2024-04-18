@@ -79,6 +79,13 @@
         s-object: False
         s-proxy: False
 
+- job:
+    name: ironic-prometheus-exporter-tox-codespell
+    parent: openstack-tox
+    timeout: 7200
+    vars:
+      tox_envlist: codespell
+
 - project:
     templates:
       - check-requirements
@@ -90,6 +97,9 @@
       jobs:
         - ironic-prometheus-exporter-redfish
         - bifrost-integration-tinyipa-keystone-centos-9
+        - ironic-prometheus-exporter-tox-codespell:
+            voting: false
+
     gate:
       jobs:
         - ironic-prometheus-exporter-redfish
