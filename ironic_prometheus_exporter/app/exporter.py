@@ -30,7 +30,7 @@ def prometheus_metrics():
         config.read(os.environ.get('IRONIC_CONFIG'))
         DIR = config['oslo_messaging_notifications']['location']
     except Exception:
-        LOG.error('Unexpected error')
+        LOG.exception('Unexpected error')
         abort(500)
 
     all_files = [os.path.join(DIR, name) for name in os.listdir(DIR)
