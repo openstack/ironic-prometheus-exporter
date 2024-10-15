@@ -12,15 +12,17 @@ Example of configuration
 
 .. code-block:: ini
 
-    [conductor]
-    send_sensor_data = true
-    send_sensor_data_interval = 300
-
     [oslo_messaging_notifications]
     driver = prometheus_exporter
     transport_url = fake://
     location = /opt/stack/node_metrics
 
+    [sensor_data]
+    send_sensor_data = true
+    interval = 600
+
+    [metrics]
+    backend = collector
 
 
 .. _ipe_conf:
@@ -35,24 +37,34 @@ Example of configuration
      - Value
      - Description
      - Required
-   * - conductor
+   * - sensor_data
      - send_sensor_data
      - true
      - Enable sending sensor data message via the notification bus.
      - ``Yes``
-   * - conductor
-     - send_sensor_data_interval
+   * - sensor_data
+     - interval
      - 600 (`default`)
      - Seconds between conductor sending sensor data message via the
        notification bus.
-     - ``Yes``
-   * - conductor
-     - send_sensor_data_for_undeployed_nodes
-     - false (`default`)
-     - When set to true, the conductor will collect sensor information from
-       all nodes when sensor data collection is enabled via the
-       ``send_sensor_data``  setting.
      - No
+   * - sensor_data
+     - enable_for_undeployed_nodes
+     - false (`default`)
+     - When set to true, the conductor will collect sensor
+       information from all nodes when sensor data collection is
+       enabled via the ``send_sensor_data`` setting.
+     - No
+   * - metrics
+     - backend
+     - collector
+     - When set to collector, the metrics system collects metrics
+       data and saves it in memory for use by the running
+       application and emits to the configured
+       ``oslo_messaging_notifications`` notification bus
+       when sensor data collection is enabled via the
+       ``send_sensor_data`` setting.
+     - ``Yes``
    * - oslo_messaging_notifications
      - driver
      - prometheus_exporter
@@ -74,3 +86,9 @@ Example of configuration
 .. note::
    After doing the modifications in the ``ironic.conf`` don't forget to
    re-start the ironic-conductor service
+
+.. note::
+   You can find additional ``[sensor_data]`` and ``[metrics]`` options
+   in the `Ironic sample config`_
+
+.. _Ironic sample config: https://docs.openstack.org/ironic/latest/configuration/sample-config.html
