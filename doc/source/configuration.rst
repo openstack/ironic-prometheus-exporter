@@ -44,13 +44,13 @@ Example of configuration
      - ``Yes``
    * - sensor_data
      - interval
-     - 600 (`default`)
+     - 600 (``default``)
      - Seconds between conductor sending sensor data message via the
        notification bus.
      - No
    * - sensor_data
      - enable_for_undeployed_nodes
-     - false (`default`)
+     - false (``default``)
      - When set to true, the conductor will collect sensor
        information from all nodes when sensor data collection is
        enabled via the ``send_sensor_data`` setting.
