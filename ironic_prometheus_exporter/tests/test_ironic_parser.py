@@ -74,10 +74,10 @@ class TestIronicPayloadParser(unittest.TestCase):
             # from the prometheus client registry collection object.
             if DUMP_JSON:
                 print('    {')
-                print(f'        \"name\": \"{sample.name}\",')  # noqa
+                print(f'        \"name\": \"{sample.name}\",')
                 print('        \"labels\": %s,' % json.dumps(sample.labels))
-                print(f'        \"value\": {sample.value},')  # noqa
-                print(f'        \"docs\": \"{entry.documentation}\",')  # noqa
+                print(f'        \"value\": {sample.value},')
+                print(f'        \"docs\": \"{entry.documentation}\",')
                 print(f'        \"type\": \"{entry.type}\"')
                 print('    },')
             else:
