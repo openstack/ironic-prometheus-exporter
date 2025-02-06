@@ -265,4 +265,5 @@ def category_registry(node_message, metrics_registry):
 
         for value, labels in details:
             valid_labels = ipe_utils.update_instance_uuid(labels)
-            gauge.labels(**valid_labels).set(value)
+            if value is not None:
+                gauge.labels(**valid_labels).set(value)
