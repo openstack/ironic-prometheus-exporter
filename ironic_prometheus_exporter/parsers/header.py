@@ -21,10 +21,13 @@ from ironic_prometheus_exporter import utils as ipe_utils
 def timestamp_registry(node_information, metric_registry):
     """Injects a last updated timestamp for a node."""
     metric = 'baremetal_last_payload_timestamp_seconds'
-    labels = {'node_uuid': node_information['node_uuid'],
-              'instance_uuid': node_information['instance_uuid']}
-    if node_information['node_name']:
-        labels['node_name'] = node_information['node_name']
+    node_uuid = node_information.get('node_uuid') \
+        or node_information.get('uuid')
+    labels = {'node_uuid': node_uuid,
+              'instance_uuid': node_information.get('instance_uuid')}
+    if node_information.get('node_name') or node_information.get('name'):
+        labels['node_name'] = node_information.get('node_name') \
+            or node_information.get('name')
     dt_1970 = datetime(1970, 1, 1, 0, 0, 0)
     dt_timestamp = datetime.strptime(node_information['timestamp'],
                                      '%Y-%m-%dT%H:%M:%S.%f')
