@@ -85,7 +85,7 @@ function check_data {
     else
         die $LINENO "Couldn't find $node_file in $IRONIC_PROMETHEUS_EXPORTER_LOCATION"
     fi
-    local stats_file="$(hostname)-ironic.metrics"
+    stats_file="$(hostname)-ironic.metrics"
     if [ -f "$IRONIC_PROMETHEUS_EXPORTER_LOCATION/$stats_file" ]; then
         echo "#### Metrics data ####"
         curl "http://$HOST_IP:$IRONIC_PROMETHEUS_EXPORTER_PORT/metrics"
