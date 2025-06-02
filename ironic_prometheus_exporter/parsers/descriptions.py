@@ -11,11 +11,9 @@
 #    under the License.
 
 
+import importlib.resources
 import json
 import logging
-import os
-
-import pkg_resources
 
 DESCRIPTIONS = {}
 
@@ -25,9 +23,9 @@ LOG = logging.getLogger(__name__)
 def get_metric_description(source, metric_name):
     if source not in DESCRIPTIONS:
         try:
-            json_file = pkg_resources.resource_filename(
-                __name__, os.path.join(
-                    'metrics_information', source + '.json'))
+            json_file = importlib.resources.files(
+                'ironic_prometheus_exporter'
+            ).joinpath('parsers/metrics_information/' + source + '.json')
 
             with open(json_file) as fl:
                 DESCRIPTIONS[source] = json.load(fl)
