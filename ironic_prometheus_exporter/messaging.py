@@ -65,6 +65,9 @@ class PrometheusFileDriver(notifier.Driver):
                 elif event_type == 'hardware.redfish.metrics':
                     redfish.category_registry(payload, registry)
 
+                elif event_type == 'hardware.idrac.metrics':
+                    redfish.category_registry(payload, registry)
+
             # Order of preference is for a node Name, UUID, or
             # payload hostname field to be used (i.e. for conductor
             # message payloads).

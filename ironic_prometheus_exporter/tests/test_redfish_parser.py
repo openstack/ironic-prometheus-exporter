@@ -46,11 +46,17 @@ class TestPayloadsParser(unittest.TestCase):
         self.assertEqual(62, metrics[expected_metric][0][0])
 
         expected_labels = {
-            'entity_id': 'CPU',
+            'identity': 'XXX-YYY-ZZZ',
+            'max_reading_range_temp': 120,
+            'min_reading_range_temp': 0,
+            'physical_context': 'CPU',
+            'sensor_number': 1,
+            'health': 'OK',
+            'state': 'enabled',
             'instance_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
             'node_name': 'knilab-master-u9',
             'node_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
-            'sensor_id': 1
+            'sensor_id': 'XXX-YYY-ZZZ@ZZZ-YYY-XXX'
         }
 
         self.assertEqual(
@@ -66,11 +72,21 @@ class TestPayloadsParser(unittest.TestCase):
         self.assertEqual(0, metrics[expected_metric][0][0])
 
         expected_labels = {
-            'entity_id': 'PSU',
+            'health': 'OK',
             'instance_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
+            'last_power_output_watts': 650,
+            'line_input_voltage': 220,
+            'maximum_frequency_hz': 63,
+            'maximum_voltage': 250,
+            'minimum_frequency_hz': 47,
+            'minimum_voltage': 185,
             'node_name': 'knilab-master-u9',
             'node_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
-            'sensor_id': '0:Power@ZZZ-YYY-XXX'
+            'output_wattage': 1450,
+            'power_capacity_watts': 1450,
+            'sensor_id': '0:Power@ZZZ-YYY-XXX',
+            'serial_number': 'SN010203040506',
+            'state': 'enabled'
         }
 
         self.assertEqual(
@@ -86,11 +102,19 @@ class TestPayloadsParser(unittest.TestCase):
         self.assertEqual(0, metrics[expected_metric][0][0])
 
         expected_labels = {
-            'entity_id': 'CPU',
+            'health': 'OK',
+            'identity': 'XXX-YYY-ZZZ',
             'instance_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
+            'max_reading_range': 10000,
+            'min_reading_range': 0,
             'node_name': 'knilab-master-u9',
             'node_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
-            'sensor_id': 'XXX-YYY-ZZZ'
+            'physical_context': 'CPU',
+            'reading': 6000,
+            'reading_units': 'RPM',
+            'sensor_id': 'XXX-YYY-ZZZ@ZZZ-YYY-XXX',
+            'serial_number': 'SN010203040506',
+            'state': 'enabled'
         }
 
         self.assertEqual(
@@ -106,11 +130,16 @@ class TestPayloadsParser(unittest.TestCase):
         self.assertEqual(0, metrics[expected_metric][0][0])
 
         expected_labels = {
-            'entity_id': 'HDD',
+            'capacity_bytes': 3750000000,
+            'failure_predicted': True,
+            'health': 'OK',
+            'identity': '32ADF365C6C1B7BD',
             'instance_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
+            'model': 'IBM 350A',
             'node_name': 'knilab-master-u9',
             'node_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
-            'sensor_id': '32ADF365C6C1B7BD:XXX-YYY-ZZZ@ZZZ-YYY-XXX'
+            'sensor_id': '32ADF365C6C1B7BD:XXX-YYY-ZZZ@ZZZ-YYY-XXX',
+            'state': 'enabled'
         }
 
         self.assertEqual(
@@ -122,10 +151,15 @@ class TestPayloadsParser(unittest.TestCase):
         redfish.category_registry(self.node_message, metrics_registry)
 
         label = {
-            'entity_id': 'HDD',
-            'instance_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
             'node_name': 'knilab-master-u9',
             'node_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
+            'instance_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
+            'capacity_bytes': '3750000000',
+            'failure_predicted': 'True',
+            'health': 'OK',
+            'identity': '32ADF365C6C1B7BD',
+            'model': 'IBM 350A',
+            'state': 'enabled',
             'sensor_id': '32ADF365C6C1B7BD:XXX-YYY-ZZZ@ZZZ-YYY-XXX'
         }
 
@@ -155,11 +189,21 @@ class TestPayloadsParser(unittest.TestCase):
         self.assertEqual(0, metrics[expected_metric][0][0])
 
         expected_labels = {
-            'entity_id': 'PSU',
+            'health': 'OK',
             'instance_uuid': 'c2bd00b9-9881-4179-8b7b-bf786ec3696b',
+            'last_power_output_watts': 650,
+            'line_input_voltage': 220,
+            'maximum_frequency_hz': 63,
+            'maximum_voltage': 250,
+            'minimum_frequency_hz': 47,
+            'minimum_voltage': 185,
             'node_name': 'knilab-master-u9',
             'node_uuid': 'c2bd00b9-9881-4179-8b7b-bf786ec3696b',
-            'sensor_id': '0:Power@ZZZ-YYY-XXX'
+            'output_wattage': 1450,
+            'power_capacity_watts': 1450,
+            'sensor_id': '0:Power@ZZZ-YYY-XXX',
+            'serial_number': 'SN010203040506',
+            'state': 'enabled'
         }
 
         self.assertEqual(
@@ -188,10 +232,16 @@ class TestPayloadsParserNoneNodeName(unittest.TestCase):
         self.assertEqual(62, metrics[expected_metric][0][0])
 
         expected_labels = {
-            'entity_id': 'CPU',
+            'identity': 'XXX-YYY-ZZZ',
+            'max_reading_range_temp': 120,
+            'min_reading_range_temp': 0,
+            'physical_context': 'CPU',
+            'sensor_number': 1,
+            'health': 'OK',
+            'state': 'enabled',
             'instance_uuid': '85d6b2c8-fe57-432d-868a-330e0e28cf34',
             'node_uuid': 'c2bd00b9-9881-4179-8b7b-bf786ec3696b',
-            'sensor_id': 1
+            'sensor_id': 'XXX-YYY-ZZZ@ZZZ-YYY-XXX'
         }
 
         self.assertEqual(
