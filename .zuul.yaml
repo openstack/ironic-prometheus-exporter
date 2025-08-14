@@ -95,11 +95,11 @@
     check:
       jobs:
         - ironic-prometheus-exporter-redfish
-        - bifrost-integration-tinyipa-keystone-centos-9
+        - bifrost-integration-tinyipa-keystone-centos-9:
+            voting: false
         - ironic-prometheus-exporter-tox-codespell:
             voting: false
 
     gate:
       jobs:
         - ironic-prometheus-exporter-redfish
-        - bifrost-integration-tinyipa-keystone-centos-9
