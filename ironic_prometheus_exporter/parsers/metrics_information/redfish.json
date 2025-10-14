@@ -1,6 +1,6 @@
 {
     "baremetal_power_status":
-        "Power supply unit health status (0 - OK, 1 - failure)",
+        "Power supply unit health status (0 - OK, 1 - Warning, 2 - Critical)",
     "baremetal_temp_room_celsius":
         "Room temperature expressed in Celsius",
     "baremetal_temp_intake_celsius":
@@ -47,8 +47,10 @@
         "Chassis temperature expressed in Celsius",
     "baremetal_temp_fan_celsius":
         "Cooling fan temperature expressed in Celsius",
+    "baremetal_temperature_status":
+        "Baremetal temperature sensor status (0 - OK, 1 - Warning, 2 - Critical)",
     "baremetal_fan_status":
-        "Cooling fan health status (0 - OK, 1 - failure)",
+        "Cooling fan health status (0 - OK, 1 - Warning, 2 - Critical)",
     "baremetal_drive_status":
-        "Storage drive health status (0 - OK, 1 - failure)"
+        "Storage drive health status (0 - OK, 1 - Warning, 2 - Critical)"
 }

@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Adds support for parsing iDRAC sensor data metrics via redfish parser.
+    A new metrics `baremetal_temperature_status` was also added.
+fixes:
+  - |
+    Fixed a bug where status metrics failed to differentiate between warning
+    and critical states, showing a value of 1 for both. The metrics now show
+    a value of 1 for Warning and 2 for Critical.

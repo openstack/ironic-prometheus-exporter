@@ -22,6 +22,13 @@ from ironic_prometheus_exporter import utils as ipe_utils
 LOG = logging.getLogger(__name__)
 
 
+HEALTH_MAP = {
+    'OK': 0,
+    'Warning': 1,
+    'Critical': 2
+}
+
+
 def _build_labels(node_message):
     fields = ['node_name', 'node_uuid', 'instance_uuid']
     if not node_message['node_name']:
@@ -29,6 +36,14 @@ def _build_labels(node_message):
     return {
         k: node_message[k] for k in fields
     }
+
+
+def _build_sensor_labels(sensor_labels, sensor_id, sensor_data, ignore_keys):
+    for k, v in sensor_data.items():
+        if k not in ignore_keys and v is not None:
+            sensor_labels[k] = v
+    sensor_labels['sensor_id'] = sensor_id
+    return sensor_labels
 
 
 def build_temperature_metrics(node_message):
@@ -49,7 +64,7 @@ def build_temperature_metrics(node_message):
                 [
                     # metric value
                     42,
-                    # metric instance in form of Prometheus labels
+                    # metric instance in form of Prometheus labels example
                     {
                         'node_name': 'kninode',
                         'node_uuid', 'XXX-YYY-ZZZ',
@@ -58,6 +73,17 @@ def build_temperature_metrics(node_message):
                         'sensor_id': '1'
                     }
                 ]
+            # baremetal_temperature_status:
+                # metric value (0 - OK, 1 - Warning, 2- Critical)
+                0,
+                # metric labels
+                {
+                        'node_name': 'kninode',
+                        'node_uuid', 'XXX-YYY-ZZZ',
+                        'instance_uuid': 'ZZZ-YYY-XXX',
+                        'entity_id': 'CPU',
+                        'sensor_id': '1'
+                }
             ]
         }
     """
@@ -69,17 +95,32 @@ def build_temperature_metrics(node_message):
     metrics = collections.defaultdict(list)
 
     for sensor_id, sensor_data in payload.items():
+        if sensor_data['state'].lower() != 'enabled':
+            continue
+
         metric = 'baremetal_temp_%s_celsius' % (
             sensor_data['physical_context'].lower())
+        sensor_reading = sensor_data.pop('reading_celsius')
+        health_value = HEALTH_MAP.get(sensor_data['health'])
+        temp_metrics = {
+               metric: sensor_reading,
+               'baremetal_temperature_status': health_value
+        }
+        ignore = []
 
         labels = _build_labels(node_message)
+        _build_sensor_labels(labels, sensor_id, sensor_data, ignore)
 
-        labels['entity_id'] = sensor_data['physical_context']
-        labels['sensor_id'] = sensor_data['sensor_number']
-
-        value = sensor_data['reading_celsius']
-
-        metrics[metric].append((value, labels))
+        for name, value in temp_metrics.items():
+            # NOTE(iurygregory): we do this to ensure the reading_celsius
+            # value is used as label for the baremetal_temperature_status
+            # metric.
+            if name == 'baremetal_temperature_status':
+                new_labels = labels.copy()
+                new_labels['reading_celsius'] = sensor_reading
+                metrics[name].append((value, new_labels))
+            else:
+                metrics[name].append((value, labels))
 
     return metrics
 
@@ -100,7 +141,7 @@ def build_power_metrics(node_message):
             # metric name
             'baremetal_power_status':
                 [
-                    # metric value (0 - OK, 1 - on fire)
+                    # metric value (0 - OK, 1 - Warning, 2- Critical)
                     0,
                     # metric instance in form of Prometheus labels
                     {
@@ -122,16 +163,17 @@ def build_power_metrics(node_message):
     metrics = collections.defaultdict(list)
 
     for sensor_id, sensor_data in payload.items():
-        metric = 'baremetal_power_status'
+        if sensor_data['state'].lower() != 'enabled':
+            continue
+
+        name = 'baremetal_power_status'
+        value = HEALTH_MAP.get(sensor_data['health'])
+        ignore = []
 
         labels = _build_labels(node_message)
+        _build_sensor_labels(labels, sensor_id, sensor_data, ignore)
 
-        labels['entity_id'] = 'PSU'
-        labels['sensor_id'] = sensor_id
-
-        value = sensor_data['health'] != 'OK' and 1 or 0
-
-        metrics[metric].append((value, labels))
+        metrics[name].append((value, labels))
 
     return metrics
 
@@ -152,7 +194,7 @@ def build_fan_metrics(node_message):
             # metric name
             'baremetal_fan_status':
                 [
-                    # metric value (0 - OK, 1 - on fire)
+                    # metric value (0 - OK, 1 - Warning, 2- Critical)
                     0,
                     # metric instance in form of Prometheus labels
                     {
@@ -174,16 +216,16 @@ def build_fan_metrics(node_message):
     metrics = collections.defaultdict(list)
 
     for sensor_id, sensor_data in payload.items():
-        metric = 'baremetal_fan_status'
+        if sensor_data['state'].lower() != 'enabled':
+            continue
+        name = 'baremetal_fan_status'
+        ignore = []
+        value = HEALTH_MAP.get(sensor_data['health'])
 
         labels = _build_labels(node_message)
+        _build_sensor_labels(labels, sensor_id, sensor_data, ignore)
 
-        labels['entity_id'] = sensor_data['physical_context']
-        labels['sensor_id'] = sensor_data['identity']
-
-        value = sensor_data['health'] != 'OK' and 1 or 0
-
-        metrics[metric].append((value, labels))
+        metrics[name].append((value, labels))
 
     return metrics
 
@@ -226,14 +268,15 @@ def build_drive_metrics(node_message):
     metrics = collections.defaultdict(list)
 
     for sensor_id, sensor_data in payload.items():
+        if sensor_data['state'].lower() != 'enabled':
+            continue
         metric = 'baremetal_drive_status'
 
+        ignore = []
         labels = _build_labels(node_message)
+        _build_sensor_labels(labels, sensor_id, sensor_data, ignore)
 
-        labels['entity_id'] = 'HDD'
-        labels['sensor_id'] = sensor_id
-
-        value = sensor_data['health'] != 'OK' and 1 or 0
+        value = HEALTH_MAP.get(sensor_data['health'])
 
         metrics[metric].append((value, labels))
 

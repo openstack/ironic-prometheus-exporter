@@ -123,17 +123,25 @@ class TestPrometheusFileNotifier(test_utils.BaseTestCase):
             os.path.dirname(ironic_prometheus_exporter.__file__),
             'tests', 'json_samples', 'notification-redfish.json')
 
+        sample_file_3 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-idrac.json')
+
         msg1 = json.load(open(sample_file_1))
         node1 = msg1['payload']['node_name']
         msg2 = json.load(open(sample_file_2))
         node2 = msg2['payload']['node_name']
+        msg3 = json.load(open(sample_file_3))
+        node3 = msg3['payload']['node_name']
 
         driver.notify(None, msg1, 'info', 0)
         driver.notify(None, msg2, 'info', 0)
+        driver.notify(None, msg3, 'info', 0)
 
         DIR = self.conf.oslo_messaging_notifications.location
         all_files = [name for name in os.listdir(DIR)
                      if os.path.isfile(os.path.join(DIR, name))]
-        self.assertEqual(len(all_files), 2)
+        self.assertEqual(len(all_files), 3)
         self.assertIn(node1 + '-hardware.ipmi.metrics', all_files)
         self.assertIn(node2 + '-hardware.redfish.metrics', all_files)
+        self.assertIn(node3 + '-hardware.idrac.metrics', all_files)
