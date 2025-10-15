@@ -24,16 +24,15 @@ sample_file = os.path.join(
     os.path.dirname(ironic_prometheus_exporter.__file__),
     'tests', 'json_samples', 'notification-idrac.json')
 
-DATA = json.load(open(sample_file))
-
 
 class TestIDRACPayloadsParser(unittest.TestCase):
 
     def setUp(self):
-        self.node_message = DATA['payload']
-        self.node_name = DATA['payload']['node_name']
-        self.node_uuid = DATA['payload']['node_uuid']
-        self.instance_uuid = DATA['payload']['instance_uuid']
+        data = json.load(open(sample_file))
+        self.node_message = data['payload']
+        self.node_name = data['payload']['node_name']
+        self.node_uuid = data['payload']['node_uuid']
+        self.instance_uuid = data['payload']['instance_uuid']
 
     def test_build_temperature_metrics(self):
         metrics = idrac_redfish.build_temperature_metrics(self.node_message)
