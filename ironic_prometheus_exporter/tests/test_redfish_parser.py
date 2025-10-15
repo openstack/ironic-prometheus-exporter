@@ -209,6 +209,23 @@ class TestPayloadsParser(unittest.TestCase):
         self.assertEqual(
             expected_labels, metrics[expected_metric][0][1])
 
+    def test_extra_hardware_information(self):
+        sample_file = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples',
+            'notification-redfish-extra-info.json')
+        msg = json.load(open(sample_file))
+
+        metrics = redfish.build_temperature_metrics(msg['payload'])
+
+        expected_metric = 'baremetal_temp_cpu_celsius'
+
+        self.assertIn(expected_metric, metrics)
+
+        self.assertIn('manufacturer', metrics[expected_metric][0][1])
+        self.assertIn('model', metrics[expected_metric][0][1])
+        self.assertIn('redfish_system_uuid', metrics[expected_metric][0][1])
+
 
 class TestPayloadsParserNoneNodeName(unittest.TestCase):
 

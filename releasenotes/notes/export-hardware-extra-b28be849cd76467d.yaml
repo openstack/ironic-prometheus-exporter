@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Adds new metric labels for Redfish metrics, this is based on the new data exposed from the Ironic sensor data via `Extra` field.
