@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    Some labels can cause Alertmanager to create separate alarm events when
+    their values change, even though the alert condition remains the same.
+    For `baremetal_temperature_status` we are ignoring the `reading_celsius`,
+    for `baremetal_power_status` we are ignoring the `last_power_output_watts`
+    and `line_input_voltage`, for `baremetal_fan_status` we are ignoring the
+    `reading` and `reading_units`.

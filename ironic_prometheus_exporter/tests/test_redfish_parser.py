@@ -74,8 +74,6 @@ class TestPayloadsParser(unittest.TestCase):
         expected_labels = {
             'health': 'OK',
             'instance_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
-            'last_power_output_watts': 650,
-            'line_input_voltage': 220,
             'maximum_frequency_hz': 63,
             'maximum_voltage': 250,
             'minimum_frequency_hz': 47,
@@ -110,8 +108,6 @@ class TestPayloadsParser(unittest.TestCase):
             'node_name': 'knilab-master-u9',
             'node_uuid': 'ac2aa2fd-6e1a-41c8-a114-2084c8705228',
             'physical_context': 'CPU',
-            'reading': 6000,
-            'reading_units': 'RPM',
             'sensor_id': 'XXX-YYY-ZZZ@ZZZ-YYY-XXX',
             'serial_number': 'SN010203040506',
             'state': 'enabled'
@@ -191,8 +187,6 @@ class TestPayloadsParser(unittest.TestCase):
         expected_labels = {
             'health': 'OK',
             'instance_uuid': 'c2bd00b9-9881-4179-8b7b-bf786ec3696b',
-            'last_power_output_watts': 650,
-            'line_input_voltage': 220,
             'maximum_frequency_hz': 63,
             'maximum_voltage': 250,
             'minimum_frequency_hz': 47,

@@ -44,7 +44,6 @@ class TestIDRACPayloadsParser(unittest.TestCase):
             'identity': '0',
             'sensor_id': '0@System.Embedded.1',
             'physical_context': 'CPU',
-            'reading_celsius': 49,
             'instance_uuid': '235e4d8a-0f1a-87a0-ea81-8a1b0277cd87',
             'node_name': 'r640-u12',
             'node_uuid': 'fe81395b-1999-4ab4-8eb0-235e1ab02778',
@@ -60,7 +59,6 @@ class TestIDRACPayloadsParser(unittest.TestCase):
             'identity': '2',
             'sensor_id': '2@System.Embedded.1',
             'physical_context': 'SystemBoard',
-            'reading_celsius': 80,
             'instance_uuid': '235e4d8a-0f1a-87a0-ea81-8a1b0277cd87',
             'node_name': 'r640-u12',
             'node_uuid': 'fe81395b-1999-4ab4-8eb0-235e1ab02778',
@@ -76,7 +74,6 @@ class TestIDRACPayloadsParser(unittest.TestCase):
             'identity': '3',
             'sensor_id': '3@System.Embedded.1',
             'physical_context': 'SystemBoard',
-            'reading_celsius': 100,
             'instance_uuid': '235e4d8a-0f1a-87a0-ea81-8a1b0277cd87',
             'node_name': 'r640-u12',
             'node_uuid': 'fe81395b-1999-4ab4-8eb0-235e1ab02778',
@@ -98,8 +95,6 @@ class TestIDRACPayloadsParser(unittest.TestCase):
 
         expected_labels = {
             'instance_uuid': '235e4d8a-0f1a-87a0-ea81-8a1b0277cd87',
-            'last_power_output_watts': 148,
-            'line_input_voltage': 208,
             'power_capacity_watts': 750,
             'node_name': 'r640-u12',
             'node_uuid': 'fe81395b-1999-4ab4-8eb0-235e1ab02778',
@@ -127,8 +122,6 @@ class TestIDRACPayloadsParser(unittest.TestCase):
             'node_name': 'r640-u12',
             'node_uuid': 'fe81395b-1999-4ab4-8eb0-235e1ab02778',
             'physical_context': 'SystemBoard',
-            'reading': 9600,
-            'reading_units': 'RPM',
             'sensor_id': '0@System.Embedded.1',
             'state': 'Enabled',
             'health': 'OK'

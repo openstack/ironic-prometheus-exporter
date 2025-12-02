@@ -117,21 +117,13 @@ def build_temperature_metrics(node_message):
                metric: sensor_reading,
                'baremetal_temperature_status': health_value
         }
-        ignore = []
+        ignore = ['reading_celsius']
 
         labels = _build_labels(node_message)
         _build_sensor_labels(labels, sensor_id, sensor_data, ignore)
 
         for name, value in temp_metrics.items():
-            # NOTE(iurygregory): we do this to ensure the reading_celsius
-            # value is used as label for the baremetal_temperature_status
-            # metric.
-            if name == 'baremetal_temperature_status':
-                new_labels = labels.copy()
-                new_labels['reading_celsius'] = sensor_reading
-                metrics[name].append((value, new_labels))
-            else:
-                metrics[name].append((value, labels))
+            metrics[name].append((value, labels))
 
     return metrics
 
@@ -179,7 +171,7 @@ def build_power_metrics(node_message):
 
         name = 'baremetal_power_status'
         value = HEALTH_MAP.get(sensor_data['health'])
-        ignore = []
+        ignore = ['last_power_output_watts', 'line_input_voltage']
 
         labels = _build_labels(node_message)
         _build_sensor_labels(labels, sensor_id, sensor_data, ignore)
@@ -230,7 +222,7 @@ def build_fan_metrics(node_message):
         if sensor_data['state'].lower() != 'enabled':
             continue
         name = 'baremetal_fan_status'
-        ignore = []
+        ignore = ['reading', 'reading_units']
         value = HEALTH_MAP.get(sensor_data['health'])
 
         labels = _build_labels(node_message)
