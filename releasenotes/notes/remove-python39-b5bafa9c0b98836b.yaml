@@ -1,0 +1,5 @@
+---
+upgrade:
+    Python version 3.9 is not supported anymore.
+    The minimum support Python version is now 3.10, and
+    we start supporting Python versions 3.12 and 3.13.
