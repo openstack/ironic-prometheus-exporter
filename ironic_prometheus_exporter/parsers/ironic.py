@@ -47,12 +47,8 @@ def category_registry(message, metrics_registry):
         if key.startswith('ironic.drivers.modules'):
             # Deconstruct driver entries/counters to be more sane and attach
             # labeling to them.
-
-            # TODO(TheJulia): Once the minimum python version is 3.9, change
-            # to str.removeprefix.
-            formatted_key = key.replace(
-                'ironic.drivers.modules.',
-                'ironic.')
+            formatted_key = 'ironic.' + key.removeprefix(
+                'ironic.drivers.modules.')
 
             for driver_label in ['ipmi', 'redfish', 'agent', 'pxe',
                                  'ilo', 'drac', 'irmc', 'inspector', 'ansible',
@@ -95,11 +91,10 @@ def category_registry(message, metrics_registry):
             # Catches entries from:
             # - ironic.conductor.manager
             # - ironic.conductor.deployments
-            # TODO(TheJulia): Once the minimum python version is 3.9, change
-            # to str.removeprefix.
             labels['component'] = 'conductor'
 
-            formatted_key = key.replace('ironic.conductor.manager.', 'ironic_')
+            formatted_key = 'ironic_' + key.removeprefix(
+                'ironic.conductor.manager.')
             for filename in ['manager', 'deployments', 'allocations']:
                 if filename in key:
                     formatted_key = key.replace(f'conductor.{filename}', '')
