@@ -44,7 +44,7 @@ def category_registry(message, metrics_registry):
                 'ironic_rest_api_')
             labels['component'] = 'api'
 
-        if key.startswith('ironic.drivers.modules'):
+        elif key.startswith('ironic.drivers.modules'):
             # Deconstruct driver entries/counters to be more sane and attach
             # labeling to them.
             formatted_key = 'ironic.' + key.removeprefix(
@@ -87,7 +87,7 @@ def category_registry(message, metrics_registry):
             labels['component'] = 'driver'
             labels['driver'] = driver
 
-        if key.startswith('ironic.conductor'):
+        elif key.startswith('ironic.conductor'):
             # Catches entries from:
             # - ironic.conductor.manager
             # - ironic.conductor.deployments
@@ -99,6 +99,11 @@ def category_registry(message, metrics_registry):
                 if filename in key:
                     formatted_key = key.replace(f'conductor.{filename}', '')
                     break
+
+        else:
+            # Unknown key type, skip it
+            LOG.debug(f'Skipping unknown metric key: {key}')
+            continue
 
         # Prometheus does not use dot delimited data structures
         # so we need to rename it to be underscore delimited.
