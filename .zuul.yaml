@@ -39,12 +39,11 @@
         IRONIC_DEFAULT_RESCUE_INTERFACE: ""
         EBTABLES_RACE_FIX: True
         IRONIC_INSPECTOR_BUILD_RAMDISK: False
-        IRONIC_RAMDISK_TYPE: tinyipa
         IRONIC_VM_COUNT: 1
         IRONIC_VM_EPHEMERAL_DISK: 1
         IRONIC_VM_LOG_DIR: '{{ devstack_base_dir }}/ironic-bm-logs'
-        IRONIC_VM_SPECS_RAM: 1024
-        IRONIC_VM_SPECS_DISK: 4
+        IRONIC_VM_SPECS_RAM: 3000
+        IRONIC_VM_SPECS_DISK: 6
         IRONIC_DEFAULT_DEPLOY_INTERFACE: direct
         Q_AGENT: openvswitch
         Q_ML2_TENANT_NETWORK_TYPE: vxlan
@@ -95,8 +94,6 @@
     check:
       jobs:
         - ironic-prometheus-exporter-redfish
-        - bifrost-integration-tinyipa-keystone-centos-9:
-            voting: false
         - ironic-prometheus-exporter-tox-codespell:
             voting: false
 
