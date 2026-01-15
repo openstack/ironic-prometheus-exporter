@@ -154,13 +154,6 @@
         "type": "gauge"
     },
     {
-        "name": "ironic_do_sync_power_state",
-        "labels": {"hostname": "a-test-conductor", "service": "ironic"},
-        "value": 0.0,
-        "docs": "Point in time count of data point.",
-        "type": "gauge"
-    },
-    {
         "name": "ironic_conductormanager_sync_power_states_time",
         "labels": {"hostname": "a-test-conductor", "service": "ironic", "component": "conductor"},
         "value": 23187.243700027466,

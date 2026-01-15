@@ -90,3 +90,21 @@ class TestIronicPayloadParser(unittest.TestCase):
             entry_count = entry_count + 1
         if not DUMP_JSON:
             self.assertEqual(len(EXPECTED), entry_count)
+
+    def test_unknown_keys_skipped(self):
+        """Test that keys without recognized prefixes are skipped."""
+        registry = CollectorRegistry()
+        message = {
+            'hostname': 'test-host',
+            'payload': {
+                'UnknownKey.SomeMetric': {'value': 0, 'type': 'gauge'},
+                'ironic.conductor.manager.ConductorManager._clean_up_caches': {
+                    'count': 1, 'sum': 1.0, 'type': 'timer'
+                }
+            }
+        }
+        # Should not raise, and should only create metrics for the known key
+        ironic.category_registry(message, registry)
+        metrics = list(registry.collect())
+        # Only the conductor metrics should be created (2 for timer)
+        self.assertEqual(2, len(metrics))
