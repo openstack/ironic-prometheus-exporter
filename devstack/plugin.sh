@@ -34,7 +34,7 @@ function configure_ironic_prometheus_exporter {
     local gunicorn_ipe_cmd
 
     gunicorn_ipe_cmd=$(which gunicorn)
-    gunicorn_ipe_cmd+=" -b ${HOST_IP}:${IRONIC_PROMETHEUS_EXPORTER_PORT}"
+    gunicorn_ipe_cmd+=" -b ${SERVICE_HOST}:${IRONIC_PROMETHEUS_EXPORTER_PORT}"
     gunicorn_ipe_cmd+=" --env IRONIC_CONFIG=$IRONIC_CONFIG"
     gunicorn_ipe_cmd+=" --env FLASK_DEBUG=1 -w 4"
     gunicorn_ipe_cmd+=" --access-logfile=$IPE_ACCESS_LF --error-logfile=$IPE_ERROR_LF"
@@ -77,7 +77,7 @@ function check_data {
     local node_file="node-0-hardware.redfish.metrics"
     if [ -f "$IRONIC_PROMETHEUS_EXPORTER_LOCATION/$node_file" ]; then
         echo "Found $node_file in $IRONIC_PROMETHEUS_EXPORTER_LOCATION"
-        if curl -s --head  --request  GET "http://$HOST_IP:$IRONIC_PROMETHEUS_EXPORTER_PORT/metrics" | grep "200 OK" > /dev/null; then
+        if curl -s --head  --request  GET "http://$SERVICE_HOST:$IRONIC_PROMETHEUS_EXPORTER_PORT/metrics" | grep "200 OK" > /dev/null; then
             echo "Data successfully retrieved from ironic-prometheus-exporter application"
         else
             die $LINENO "Couldn't get data from ironic-prometheus-exporter application"
@@ -88,7 +88,7 @@ function check_data {
     stats_file="$(hostname)-ironic.metrics"
     if [ -f "$IRONIC_PROMETHEUS_EXPORTER_LOCATION/$stats_file" ]; then
         echo "#### Metrics data ####"
-        curl "http://$HOST_IP:$IRONIC_PROMETHEUS_EXPORTER_PORT/metrics"
+        curl "http://$SERVICE_HOST:$IRONIC_PROMETHEUS_EXPORTER_PORT/metrics"
     else
         die $LINENO "Could not find $stats_file in $IRONIC_PROMETHEUS_EXPORTER_LOCATION"
     fi
