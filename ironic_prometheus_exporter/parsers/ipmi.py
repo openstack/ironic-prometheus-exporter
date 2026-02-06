@@ -79,7 +79,9 @@ CATEGORY_PARAMS = {
 IPMI_JSON = importlib.resources.files(
     'ironic_prometheus_exporter'
 ).joinpath('parsers/metrics_information/ipmi.json')
-IPMI_METRICS_DESCRIPTION = json.load(open(IPMI_JSON))
+
+with open(IPMI_JSON) as f:
+    IPMI_METRICS_DESCRIPTION = json.load(f)
 
 
 def metric_names(category_info):
