@@ -11,15 +11,30 @@
 #    under the License.
 
 from datetime import datetime
+import logging
 
 from prometheus_client import Gauge
 
 from ironic_prometheus_exporter.parsers import descriptions
 from ironic_prometheus_exporter import utils as ipe_utils
 
+LOG = logging.getLogger(__name__)
+
 
 def timestamp_registry(node_information, metric_registry):
     """Injects a last updated timestamp for a node."""
+    timestamp_str = node_information.get('timestamp')
+    if not timestamp_str:
+        LOG.debug("Skipping timestamp metric: no timestamp in payload")
+        return
+
+    try:
+        dt_timestamp = datetime.strptime(timestamp_str,
+                                         '%Y-%m-%dT%H:%M:%S.%f')
+    except ValueError:
+        LOG.warning("Invalid timestamp format: %s", timestamp_str)
+        return
+
     metric = 'baremetal_last_payload_timestamp_seconds'
     node_uuid = node_information.get('node_uuid') \
         or node_information.get('uuid')
@@ -29,8 +44,6 @@ def timestamp_registry(node_information, metric_registry):
         labels['node_name'] = node_information.get('node_name') \
             or node_information.get('name')
     dt_1970 = datetime(1970, 1, 1, 0, 0, 0)
-    dt_timestamp = datetime.strptime(node_information['timestamp'],
-                                     '%Y-%m-%dT%H:%M:%S.%f')
     value = int((dt_timestamp - dt_1970).total_seconds())
 
     desc = descriptions.get_metric_description('header', metric)
@@ -44,12 +57,29 @@ def timestamp_registry(node_information, metric_registry):
 
 
 def timestamp_conductor_registry(payload, metric_registry):
-    """Injets a last updated at timestamp for a conductor."""
+    """Injects a last updated at timestamp for a conductor."""
+    hostname = payload.get('hostname')
+    if not hostname:
+        LOG.debug("Skipping conductor timestamp metric: "
+                  "no hostname in payload")
+        return
+
+    timestamp_str = payload.get('timestamp')
+    if not timestamp_str:
+        LOG.debug("Skipping conductor timestamp metric: "
+                  "no timestamp in payload")
+        return
+
+    try:
+        dt_timestamp = datetime.strptime(timestamp_str,
+                                         '%Y-%m-%dT%H:%M:%S.%f')
+    except ValueError:
+        LOG.warning("Invalid conductor timestamp format: %s", timestamp_str)
+        return
+
     metric = 'conductor_service_last_payload_timestamp_seconds'
-    labels = {'hostname': payload['hostname']}
+    labels = {'hostname': hostname}
     dt_1970 = datetime(1970, 1, 1, 0, 0, 0)
-    dt_timestamp = datetime.strptime(payload['timestamp'],
-                                     '%Y-%m-%dT%H:%M:%S.%f')
     value = int((dt_timestamp - dt_1970).total_seconds())
 
     desc = descriptions.get_metric_description('header', metric)
@@ -58,4 +88,4 @@ def timestamp_conductor_registry(payload, metric_registry):
         metric, desc, labelnames=labels,
         registry=metric_registry)
 
-    g.labels(labels).set(value)
+    g.labels(**labels).set(value)

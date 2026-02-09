@@ -25,7 +25,8 @@ sample_file = os.path.join(
     os.path.dirname(ironic_prometheus_exporter.__file__),
     'tests', 'json_samples', 'notification-header.json')
 
-DATA = json.load(open(sample_file))
+with open(sample_file) as f:
+    DATA = json.load(f)
 
 
 class TestPayloadsParser(unittest.TestCase):
@@ -53,7 +54,8 @@ class TestPayloadsParser(unittest.TestCase):
         sample_file_2 = os.path.join(
             os.path.dirname(ironic_prometheus_exporter.__file__),
             'tests', 'json_samples', 'notification-header-with-none.json')
-        msg2 = json.load(open(sample_file_2))
+        with open(sample_file_2) as f:
+            msg2 = json.load(f)
         self.assertIsNone(msg2['payload']['instance_uuid'])
         valid_labels = ipe_utils.update_instance_uuid(msg2['payload'])
         self.assertEqual(valid_labels['instance_uuid'],
@@ -71,7 +73,8 @@ class TestPayloadsParser(unittest.TestCase):
         sample_file_2 = os.path.join(
             os.path.dirname(ironic_prometheus_exporter.__file__),
             'tests', 'json_samples', 'notification-none-node_name.json')
-        msg2 = json.load(open(sample_file_2))
+        with open(sample_file_2) as f:
+            msg2 = json.load(f)
         self.assertIsNone(msg2['payload']['node_name'])
 
         header.timestamp_registry(msg2['payload'], self.metric_registry)
@@ -85,7 +88,8 @@ class TestPayloadsParser(unittest.TestCase):
         sample_file_2 = os.path.join(
             os.path.dirname(ironic_prometheus_exporter.__file__),
             'tests', 'json_samples', 'notification-empty-node_name.json')
-        msg2 = json.load(open(sample_file_2))
+        with open(sample_file_2) as f:
+            msg2 = json.load(f)
         self.assertEqual(msg2['payload']['node_name'], "")
 
         header.timestamp_registry(msg2['payload'], self.metric_registry)
@@ -94,3 +98,47 @@ class TestPayloadsParser(unittest.TestCase):
             {'node_uuid': msg2['payload']['node_uuid'],
              'instance_uuid': msg2['payload']['instance_uuid']}
         ))
+
+    def test_missing_timestamp(self):
+        sample_file_2 = os.path.join(
+            os.path.dirname(ironic_prometheus_exporter.__file__),
+            'tests', 'json_samples', 'notification-missing-timestamp.json')
+        with open(sample_file_2) as f:
+            msg2 = json.load(f)
+        self.assertNotIn('timestamp', msg2['payload'])
+
+        header.timestamp_registry(msg2['payload'], self.metric_registry)
+        self.assertIsNone(self.metric_registry.get_sample_value(
+            'baremetal_last_payload_timestamp_seconds',
+            {'node_uuid': msg2['payload']['node_uuid'],
+             'node_name': msg2['payload']['node_name'],
+             'instance_uuid': msg2['payload']['instance_uuid']}
+        ))
+
+    def test_invalid_timestamp_format(self):
+        payload = {
+            'node_uuid': 'test-uuid',
+            'instance_uuid': 'test-instance',
+            'node_name': 'test-node',
+            'timestamp': 'invalid-timestamp-format'
+        }
+        header.timestamp_registry(payload, self.metric_registry)
+        self.assertIsNone(self.metric_registry.get_sample_value(
+            'baremetal_last_payload_timestamp_seconds',
+            {'node_uuid': 'test-uuid',
+             'node_name': 'test-node',
+             'instance_uuid': 'test-instance'}
+        ))
+
+    def test_conductor_missing_timestamp(self):
+        payload = {'hostname': 'test-conductor'}
+        header.timestamp_conductor_registry(payload, self.metric_registry)
+        self.assertIsNone(self.metric_registry.get_sample_value(
+            'conductor_service_last_payload_timestamp_seconds',
+            {'hostname': 'test-conductor'}
+        ))
+
+    def test_conductor_missing_hostname(self):
+        payload = {'timestamp': '2019-03-29T20:12:22.989020'}
+        header.timestamp_conductor_registry(payload, self.metric_registry)
+        # Should skip silently without error - no metric registered
