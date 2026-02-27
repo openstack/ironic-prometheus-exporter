@@ -57,6 +57,68 @@ def _build_sensor_labels(sensor_labels, sensor_id, sensor_data, ignore_keys):
     return sensor_labels
 
 
+def _extract_sensor_payload(node_message, sensor_type):
+    """Extract sensor payload from node message.
+
+    :param node_message: Oslo notification message
+    :param sensor_type: Type of sensor (Temperature, Power, Fan, Drive)
+    :returns: Sensor payload dictionary
+    """
+    payload = node_message
+    for key in ('payload', sensor_type):
+        payload = payload.get(key, {})
+    return payload
+
+
+def _build_generic_sensor_metrics(
+        node_message, sensor_type, metrics_builder_fn, ignore_keys=None):
+    """Generic function to build sensor metrics from Oslo message.
+
+    :param node_message: Oslo notification message
+    :param sensor_type: Type of sensor (Temperature, Power, Fan, Drive)
+    :param metrics_builder_fn: Function to build metrics dict from sensor_data
+    :param ignore_keys: List of keys to ignore when building sensor labels
+    :returns: Dictionary of metrics with (value, labels) tuples
+    """
+    if ignore_keys is None:
+        ignore_keys = []
+
+    payload = _extract_sensor_payload(node_message, sensor_type)
+    metrics = collections.defaultdict(list)
+
+    for sensor_id, sensor_data in payload.items():
+        try:
+            state = sensor_data.get('state')
+            if not state:
+                LOG.debug('Skipping %s sensor %s: missing state field',
+                          sensor_type, sensor_id)
+                continue
+            if state.lower() != 'enabled':
+                LOG.debug('Skipping %s sensor %s: state is %s',
+                          sensor_type, sensor_id, state)
+                continue
+
+            # Build metrics using the provided function
+            sensor_metrics = metrics_builder_fn(sensor_data)
+            if sensor_metrics is None:
+                continue
+
+            # Build labels
+            labels = _build_labels(node_message)
+            _build_sensor_labels(labels, sensor_id, sensor_data, ignore_keys)
+
+            # Add metrics to result
+            for name, value in sensor_metrics.items():
+                metrics[name].append((value, labels))
+
+        except Exception as e:
+            LOG.exception('Error processing %s sensor %s: %s',
+                          sensor_type, sensor_id, e)
+            continue
+
+    return metrics
+
+
 def build_temperature_metrics(node_message):
     """Build Prometheus temperature metrics from Oslo message.
 
@@ -98,34 +160,32 @@ def build_temperature_metrics(node_message):
             ]
         }
     """
-    payload = node_message
+    def _build_temp_metrics(sensor_data):
+        physical_context = sensor_data.get('physical_context')
+        reading_celsius = sensor_data.get('reading_celsius')
+        health = sensor_data.get('health')
 
-    for key in ('payload', 'Temperature'):
-        payload = payload.get(key, {})
+        if not physical_context:
+            LOG.debug('Missing physical_context in temperature sensor')
+            return None
+        if reading_celsius is None:
+            LOG.debug('Missing reading_celsius in temperature sensor')
+            return None
 
-    metrics = collections.defaultdict(list)
+        metric_name = 'baremetal_temp_%s_celsius' % physical_context.lower()
+        health_value = HEALTH_MAP.get(health)
 
-    for sensor_id, sensor_data in payload.items():
-        if sensor_data['state'].lower() != 'enabled':
-            continue
-
-        metric = 'baremetal_temp_%s_celsius' % (
-            sensor_data['physical_context'].lower())
-        sensor_reading = sensor_data.pop('reading_celsius')
-        health_value = HEALTH_MAP.get(sensor_data['health'])
-        temp_metrics = {
-               metric: sensor_reading,
-               'baremetal_temperature_status': health_value
+        return {
+            metric_name: reading_celsius,
+            'baremetal_temperature_status': health_value
         }
-        ignore = ['reading_celsius']
 
-        labels = _build_labels(node_message)
-        _build_sensor_labels(labels, sensor_id, sensor_data, ignore)
-
-        for name, value in temp_metrics.items():
-            metrics[name].append((value, labels))
-
-    return metrics
+    return _build_generic_sensor_metrics(
+        node_message,
+        'Temperature',
+        _build_temp_metrics,
+        ignore_keys=['reading_celsius']
+    )
 
 
 def build_power_metrics(node_message):
@@ -158,27 +218,17 @@ def build_power_metrics(node_message):
             ]
         }
     """
-    payload = node_message
+    def _build_power_metrics(sensor_data):
+        health = sensor_data.get('health')
+        health_value = HEALTH_MAP.get(health)
+        return {'baremetal_power_status': health_value}
 
-    for key in ('payload', 'Power'):
-        payload = payload.get(key, {})
-
-    metrics = collections.defaultdict(list)
-
-    for sensor_id, sensor_data in payload.items():
-        if sensor_data['state'].lower() != 'enabled':
-            continue
-
-        name = 'baremetal_power_status'
-        value = HEALTH_MAP.get(sensor_data['health'])
-        ignore = ['last_power_output_watts', 'line_input_voltage']
-
-        labels = _build_labels(node_message)
-        _build_sensor_labels(labels, sensor_id, sensor_data, ignore)
-
-        metrics[name].append((value, labels))
-
-    return metrics
+    return _build_generic_sensor_metrics(
+        node_message,
+        'Power',
+        _build_power_metrics,
+        ignore_keys=['last_power_output_watts', 'line_input_voltage']
+    )
 
 
 def build_fan_metrics(node_message):
@@ -211,26 +261,17 @@ def build_fan_metrics(node_message):
             ]
         }
     """
-    payload = node_message
+    def _build_fan_metrics(sensor_data):
+        health = sensor_data.get('health')
+        health_value = HEALTH_MAP.get(health)
+        return {'baremetal_fan_status': health_value}
 
-    for key in ('payload', 'Fan'):
-        payload = payload.get(key, {})
-
-    metrics = collections.defaultdict(list)
-
-    for sensor_id, sensor_data in payload.items():
-        if sensor_data['state'].lower() != 'enabled':
-            continue
-        name = 'baremetal_fan_status'
-        ignore = ['reading', 'reading_units']
-        value = HEALTH_MAP.get(sensor_data['health'])
-
-        labels = _build_labels(node_message)
-        _build_sensor_labels(labels, sensor_id, sensor_data, ignore)
-
-        metrics[name].append((value, labels))
-
-    return metrics
+    return _build_generic_sensor_metrics(
+        node_message,
+        'Fan',
+        _build_fan_metrics,
+        ignore_keys=['reading', 'reading_units']
+    )
 
 
 def build_drive_metrics(node_message):
@@ -263,27 +304,17 @@ def build_drive_metrics(node_message):
             ]
         }
     """
-    payload = node_message
+    def _build_drive_metrics(sensor_data):
+        health = sensor_data.get('health')
+        health_value = HEALTH_MAP.get(health)
+        return {'baremetal_drive_status': health_value}
 
-    for key in ('payload', 'Drive'):
-        payload = payload.get(key, {})
-
-    metrics = collections.defaultdict(list)
-
-    for sensor_id, sensor_data in payload.items():
-        if sensor_data['state'].lower() != 'enabled':
-            continue
-        metric = 'baremetal_drive_status'
-
-        ignore = []
-        labels = _build_labels(node_message)
-        _build_sensor_labels(labels, sensor_id, sensor_data, ignore)
-
-        value = HEALTH_MAP.get(sensor_data['health'])
-
-        metrics[metric].append((value, labels))
-
-    return metrics
+    return _build_generic_sensor_metrics(
+        node_message,
+        'Drive',
+        _build_drive_metrics,
+        ignore_keys=[]
+    )
 
 
 def category_registry(node_message, metrics_registry):
