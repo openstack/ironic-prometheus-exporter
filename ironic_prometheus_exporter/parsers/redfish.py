@@ -220,7 +220,13 @@ def build_power_metrics(node_message):
     """
     def _build_power_metrics(sensor_data):
         health = sensor_data.get('health')
+        if not health:
+            LOG.debug('Missing health field in power sensor')
+            return None
         health_value = HEALTH_MAP.get(health)
+        if health_value is None:
+            LOG.debug('Unknown health value %s in power sensor', health)
+            return None
         return {'baremetal_power_status': health_value}
 
     return _build_generic_sensor_metrics(
@@ -263,7 +269,13 @@ def build_fan_metrics(node_message):
     """
     def _build_fan_metrics(sensor_data):
         health = sensor_data.get('health')
+        if not health:
+            LOG.debug('Missing health field in fan sensor')
+            return None
         health_value = HEALTH_MAP.get(health)
+        if health_value is None:
+            LOG.debug('Unknown health value %s in fan sensor', health)
+            return None
         return {'baremetal_fan_status': health_value}
 
     return _build_generic_sensor_metrics(
@@ -306,7 +318,13 @@ def build_drive_metrics(node_message):
     """
     def _build_drive_metrics(sensor_data):
         health = sensor_data.get('health')
+        if not health:
+            LOG.debug('Missing health field in drive sensor')
+            return None
         health_value = HEALTH_MAP.get(health)
+        if health_value is None:
+            LOG.debug('Unknown health value %s in drive sensor', health)
+            return None
         return {'baremetal_drive_status': health_value}
 
     return _build_generic_sensor_metrics(
