@@ -10,24 +10,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
+from importlib.resources import files
 import json
 import logging
-import os
-
-import pkg_resources
 
 DESCRIPTIONS = {}
 
 LOG = logging.getLogger(__name__)
 
+_PACKAGE_FILES = files('ironic_prometheus_exporter.parsers')
+
 
 def get_metric_description(source, metric_name):
     if source not in DESCRIPTIONS:
         try:
-            json_file = pkg_resources.resource_filename(
-                __name__, os.path.join(
-                    'metrics_information', source + '.json'))
+            json_file = (_PACKAGE_FILES / 'metrics_information' /
+                         (source + '.json'))
 
             with open(json_file) as fl:
                 DESCRIPTIONS[source] = json.load(fl)

@@ -10,11 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from importlib.resources import files
 import json
 import logging
 import re
 
-import pkg_resources
 from prometheus_client import Gauge
 
 from ironic_prometheus_exporter.parsers import descriptions
@@ -30,6 +30,7 @@ from ironic_prometheus_exporter import utils as ipe_utils
 
 LOG = logging.getLogger(__name__)
 
+_PACKAGE_FILES = files('ironic_prometheus_exporter.parsers')
 
 CATEGORY_PARAMS = {
     'management': {'prefix': 'baremetal_',
@@ -76,8 +77,7 @@ CATEGORY_PARAMS = {
 }
 
 
-IPMI_JSON = pkg_resources.resource_filename(__name__,
-                                            "metrics_information/ipmi.json")
+IPMI_JSON = _PACKAGE_FILES / "metrics_information" / "ipmi.json"
 IPMI_METRICS_DESCRIPTION = json.load(open(IPMI_JSON))
 
 

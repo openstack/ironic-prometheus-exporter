@@ -1,0 +1,11 @@
+---
+upgrade:
+  - |
+    Python 3.8 support has been dropped. The minimum version of Python now
+    supported by ironic-prometheus-exporter is Python 3.9.
+fixes:
+  - |
+    Replaced the deprecated ``pkg_resources`` module with
+    ``importlib.resources`` for loading package data files.
+    ``pkg_resources`` was removed in setuptools 82.x, causing
+    ``ModuleNotFoundError`` during test discovery.
